@@ -1,4 +1,6 @@
-# Fermyon Wasm Functions Examples
+# Akamai Functions Samples
+
+This repository contains various samples for applications that one could run on Akamai Functions.
 
 ## Tutorials
 
@@ -18,7 +20,7 @@
 - [A/B Testing using Cookies](./samples/ab-testing-cookie/)
   - This folder contains a Spin application showcasing how to implement A/B testing based on a cookie.
 - [A/B Testing using Key-Value Store](./samples/ab-testing-kv/)
-  - This folder contains a Spin application providing different samples for doing A/B testing on Fermyon Wasm Functions.
+  - This folder contains a Spin application providing different samples for doing A/B testing on Akamai Functions.
 - [A/B Testing using HTTP Headers (e.g User Agent)](./samples/ab-testing-user-agent/)
   - This folder contains a Spin application that demonstrates how to implement A/B testing based on the user agent.
 - [Aggregate JSON](./samples/aggregate-json/)
