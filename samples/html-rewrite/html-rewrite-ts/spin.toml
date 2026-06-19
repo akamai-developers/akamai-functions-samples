@@ -7,7 +7,7 @@ name = "html-rewrite-ts"
 version = "0.1.0"
 
 [variables]
-upstream_url = { default = "https://www.fermyon.com" }
+upstream_url = { default = "https://spinframework.dev" }
 use_kv_store = { default = "true" }
 ttl_in_minutes = { default = "60" }
 
