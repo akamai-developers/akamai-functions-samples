@@ -4,21 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx webpack && mkdirp dist && j2w -i build/bundle.js -o dist/block-ip.wasm",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build.mjs",
+    "build:debug": "node build.mjs --debug"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "mkdirp": "^3.0.1",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "@bytecodealliance/jco": "^1.17.6",
+    "esbuild": "^0.28.1",
+    "mkdirp": "^3.0.1"
   },
   "dependencies": {
-    "@spinframework/build-tools": "^1.0.1",
-    "@spinframework/spin-kv": "^1.0.0",
-    "@spinframework/wasi-http-proxy": "^1.0.0",
+    "@spinframework/spin-kv": "^1.0.1",
+    "@spinframework/wasi-http-proxy": "^2.0.0",
     "itty-router": "^5.0.18"
   }
 }
