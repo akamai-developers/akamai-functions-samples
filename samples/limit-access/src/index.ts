@@ -12,6 +12,7 @@ const guard = async function (req: Request, event: FetchEvent, config: Config): 
     const now = new Date().getTime();
     const blockUntil = Date.parse(config.blockUntil);
     if (now < blockUntil) {
+      console.log("Will block request...")
       if (config.trackBlockedRequests) {
         event.waitUntil(trackBlockedRequest(req));
       }
