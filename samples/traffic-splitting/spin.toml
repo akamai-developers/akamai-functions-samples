@@ -25,10 +25,10 @@ component = "ui"
 [component.api]
 source = "api/dist/api.wasm"
 allowed_outbound_hosts = [
-    "{{database_url}}",
-    "https://github.com",
-    "https://api.github.com",
-    "https://api.honeycomb.io",
+  "{{database_url}}",
+  "https://github.com",
+  "https://api.github.com",
+  "https://api.honeycomb.io",
 ]
 [component.api.variables]
 database_url = "{{database_url}}"
@@ -48,4 +48,4 @@ files = [{ source = "ui/out", destination = "/" }]
 environment = { FALLBACK_PATH = "index.html" }
 [component.ui.build]
 workdir = "ui"
-command = ["pnpm install", "pnpm run build"]
+command = ["npm install", "npm run build"]
