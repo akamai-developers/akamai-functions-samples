@@ -11,6 +11,7 @@ component = "geoip-example"
 [component.geoip-example]
 source = "target/wasm32-wasip1/release/geoip_example.wasm"
 allowed_outbound_hosts = []
+
 [component.geoip-example.build]
 command = "make build"
 watch = ["src/**/*.rs", "Cargo.toml"]
