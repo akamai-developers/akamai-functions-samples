@@ -1,16 +1,28 @@
 # Cookie Parsing
 
-This sample demonstrates cookie parsing using the NPM `cookie` package.
+This sample demonstrates cookie parsing using the NPM `cookie` package. A single
+Function serves an interactive UI and a dedicated endpoint that parses the
+incoming `Cookie` request header and returns the cookies as JSON.
+
+## Routes
+
+- `GET /` &mdash; browser UI that lets you set a demo cookie and parse it.
+- `GET /cookies` &mdash; parses the incoming `Cookie` header and returns the cookies as JSON.
 
 ## Try it out
 
-The sample looks for the `fwf_cookie_sample` cookie and reports its value.
-To try the sample, run `spin up --build`, then, in another terminal, run:
+Run `spin up --build`, then open <http://localhost:3000> in a browser. Click
+**Set demo cookie**, then **Parse my cookies** to see the parsed result.
+
+You can also call the endpoint directly with `curl`:
 
 ```
-# The cookie is present
-curl -H "Cookie: fwf_cookie_sample=fwf" localhost:3000
+# One cookie
+curl -H "Cookie: AKAMAI_FUNCTIONS_DEMO=hello-from-akamai-functions" localhost:3000/cookies
 
-# The cookie is not present
-curl -H "Cookie: token=123" localhost:3000
+# Multiple cookies
+curl -H "Cookie: AKAMAI_FUNCTIONS_DEMO=hello-from-akamai-functions; token=123" localhost:3000/cookies
+
+# No cookies
+curl localhost:3000/cookies
 ```

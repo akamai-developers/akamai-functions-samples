@@ -1,0 +1,28 @@
+// build.mjs
+import { build } from 'esbuild';
+import { SpinEsbuildPlugin } from "@spinframework/build-tools/plugins/esbuild";
+
+const debug = process.argv.includes('--debug');
+
+await build({
+    entryPoints: ['./src/index.ts'],
+    outfile: './build/bundle.js',
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    sourcemap: true,
+    minify: false,
+    loader: {
+        '.ts': 'ts',
+        '.tsx': 'tsx',
+        '.html': 'text',
+    },
+    resolveExtensions: ['.ts', '.tsx', '.js'],
+    plugins: [await SpinEsbuildPlugin({
+        componentize: {
+            debug,
+            output: './dist/parse-cookie.wasm',
+            initLocation: 'http://test-deps.localhost',
+        }
+    })],
+});

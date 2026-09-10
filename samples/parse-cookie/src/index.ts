@@ -1,30 +1,22 @@
+import { Hono } from 'hono';
+import { fire } from 'hono/service-worker';
 import * as cookie from 'cookie';
+import indexHtml from './index.html';
 
-function parseCookie(request: Request, cookieName: string): string | undefined {
-    const cookieHeader = request.headers.get("Cookie");
-    if (!cookieHeader) {
-        return undefined;
-    }
+const app = new Hono();
 
-    const cookies = cookie.parse(cookieHeader);
+// Landing page with the interactive cookie demo.
+app.get('/', (c) => c.html(indexHtml));
 
-    const cookieValue = cookies[cookieName];
-    return cookieValue;
-}
-
-function respond(request: Request): Response {
-    const cookieName = "fwf_cookie_sample";
-
-    const cookieValue = parseCookie(request, cookieName);
-
-    if (cookieValue) {
-        return new Response(cookieValue);
-    } else {
-        return new Response("cookie not set");
-    }
-}
-
-//@ts-ignore
-addEventListener('fetch', (event: FetchEvent) => {
-    event.respondWith(respond(event.request));
+// Parse the incoming Cookie header and return the cookies as JSON.
+// This is the dedicated endpoint that holds the sample's core logic.
+app.get('/cookies', (c) => {
+  const cookieHeader = c.req.header('cookie');
+  const cookies = cookieHeader ? cookie.parse(cookieHeader) : {};
+  return c.json({
+    count: Object.keys(cookies).length,
+    cookies,
+  });
 });
+
+fire(app, { fetch: undefined })

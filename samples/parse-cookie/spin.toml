@@ -13,6 +13,8 @@ component = "parse-cookie"
 [component.parse-cookie]
 source = "dist/parse-cookie.wasm"
 exclude_files = ["**/node_modules"]
+
 [component.parse-cookie.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]
+
