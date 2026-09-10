@@ -14,6 +14,7 @@ component = "respond-with-another-site"
 source = "dist/respond-with-another-site.wasm"
 allowed_outbound_hosts = ["https://random-data-api.fermyon.app"]
 exclude_files = ["**/node_modules"]
+
 [component.respond-with-another-site.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]

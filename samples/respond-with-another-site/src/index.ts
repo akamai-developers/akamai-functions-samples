@@ -3,23 +3,20 @@
 // Source: https://developers.cloudflare.com/workers/examples/respond-with-another-site/
 // The original example is provided by Cloudflare under the MIT License.
 
-async function respondOther(request: Request): Promise<Response> {
-    if (request.method !== "GET") {
-        return methodNotAllowed();
-    }
-    return fetch(`https://random-data-api.fermyon.app/animals/json`);
-}
+import { Hono } from 'hono';
+import { fire } from 'hono/service-worker';
+import indexHtml from './index.html';
+const UPSTREAM = 'https://random-data-api.fermyon.app/animals/json';
 
-function methodNotAllowed(): Response {
-    return new Response("Method not allowed", {
-        status: 405,
-        headers: {
-            Allow: "GET"
-        }
-    });
-}
+const app = new Hono();
 
-//@ts-ignore
-addEventListener('fetch', (event: FetchEvent) => {
-    event.respondWith(respondOther(event.request));
+// Landing page describing the proxy behavior.
+app.get('/', (c) => c.html(indexHtml));
+
+// Dedicated endpoint that responds with the content fetched from another site.
+app.get('/site', async () => {
+    return fetch(UPSTREAM);
 });
+
+
+fire(app, {fetch: undefined})

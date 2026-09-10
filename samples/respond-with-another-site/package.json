@@ -4,7 +4,8 @@
     "description": "Respond to a request with the response from another site",
     "main": "index.js",
     "scripts": {
-        "build": "npx webpack && mkdirp dist && j2w -i build/bundle.js -o dist/respond-with-another-site.wasm",
+        "build": "tsc --noEmit && node build.mjs",
+        "build:debug": "tsc --noEmit && node build.mjs --debug",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -13,12 +14,12 @@
     "devDependencies": {
         "mkdirp": "^3.0.1",
         "ts-loader": "^9.4.1",
-        "typescript": "^4.8.4",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
+        "typescript": "^7.0.2",
+        "esbuild": "^0.25.8",
+        "@bytecodealliance/jco": "^1.17.6"
     },
     "dependencies": {
-        "@spinframework/build-tools": "^1.0.1",
-        "@spinframework/wasi-http-proxy": "^1.0.0"
+        "hono": "^4.13.7",
+        "@spinframework/wasi-http-proxy": "^2.0.0"
     }
 }
