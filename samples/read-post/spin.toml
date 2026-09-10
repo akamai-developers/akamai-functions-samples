@@ -13,6 +13,7 @@ component = "read-post"
 [component.read-post]
 source = "dist/read-post.wasm"
 exclude_files = ["**/node_modules"]
+
 [component.read-post.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]

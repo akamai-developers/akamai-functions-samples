@@ -3,14 +3,14 @@
 // Source: https://developers.cloudflare.com/workers/examples/read-post/
 // The original example is provided by Cloudflare under the MIT License.
 
-function rawHtmlResponse(html: string): Response {
-    return new Response(html, {
-        headers: {
-            "content-type": "text/html",
-        },
-    });
-}
+import { Hono } from 'hono';
+// @ts-ignore - resolved by the bundler at build time
+import indexHtml from './index.html';
+import { fire } from 'hono/service-worker';
 
+const app = new Hono();
+
+// Inspect the request body and describe it based on its content type.
 async function readRequestBody(request: Request): Promise<string> {
     const contentType = request.headers.get("content-type") || '';
     if (contentType.includes("application/json")) {
@@ -38,45 +38,19 @@ async function readRequestBody(request: Request): Promise<string> {
     }
 }
 
-function testForm(): string {
-    // This is just a way to send data to the form reader.
-    let lines = [
-        '<html>',
-        '  <head><title>Test form</title></head>',
-        '  <body>',
-        '    <form action="/" method="post">',
-        '      <p><label for="name">Enter your name: </label><input type="text" name="name" id="name" required /></p>',
-        '      <p><label for="subscribe">Subscribe? </label><input type="checkbox" name="subscribe" id="subscribe" /></p>',
-        '      <p><input type="submit" value="Submit" /></p>',
-        '    </form>',
-        '  </body>',
-        '</html>',
-    ];
-    return lines.join('\n');
-}
+// Serve the UI that lets you compose and send a POST request from the browser.
+app.get('/', (c) => c.html(indexHtml));
 
-async function readPostRequest(request: Request): Promise<Response> {
-    const { url } = request;
+// Read the POST body and echo back a description of what was received.
+// This is the endpoint the UI posts to; it also works directly with curl.
+const echo = async (c: any) => {
+    const requestInfo = await readRequestBody(c.req.raw);
+    return c.text(`The POST body sent was ${requestInfo}`);
+};
 
-    if (request.method === "POST") {
-        const requestInfo = await readRequestBody(request);
-        const responseBody = `The POST body sent was ${requestInfo}`;
-        return new Response(responseBody);
-    }
+app.post('/echo', echo);
 
-    // So that you can localhost:3000/form to exercise the form behaviour
-    if (request.method == "GET") {
-        if (url.includes("form")) {
-            return rawHtmlResponse(testForm());
-        } else {
-            return new Response(`The request was a ${request.method}. Visit /form if you wanted to run the test form.`);
-        }
-    }
+// Keep the original behaviour available: POST to the root still reads the body.
+app.post('/', echo);
 
-    return new Response(`The request was a ${request.method}`);
-}
-
-//@ts-ignore
-addEventListener('fetch', (event: FetchEvent) => {
-    event.respondWith(readPostRequest(event.request));
-});
+fire(app, { fetch: undefined})

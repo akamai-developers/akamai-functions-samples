@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Read POST Body &middot; Akamai Functions</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141a2e;
+      --border: #26304d;
+      --text: #e7ebf5;
+      --muted: #9aa5c0;
+      --accent: #10b981;
+      --accent-hover: #0e9f70;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 120px 1.5rem 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 1.0625rem;
+      background: radial-gradient(1200px 600px at 50% -10%, #0d3a2c 0%, var(--bg) 60%), var(--bg);
+      color: var(--text);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1.9rem;
+      line-height: 1.2;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0.75rem 0;
+    }
+
+    p code {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    .form {
+      margin: 1.5rem 0 0.5rem;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1rem 0 0.4rem;
+    }
+
+    select, textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.7rem 0.8rem;
+    }
+
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--accent);
+      color: #04241a;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      font-family: inherit;
+      border-radius: 10px;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: translateY(1px); }
+    .btn svg { width: 1.1em; height: 1.1em; }
+
+    .result {
+      margin: 1.5rem 0 0;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      color: var(--text);
+      min-height: 1.2em;
+      display: none;
+    }
+
+    .result.show { display: block; }
+
+    footer {
+      margin-top: 1.75rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    footer a:hover { color: var(--text); }
+    footer a svg { width: 1em; height: 1em; }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <span class="badge">Akamai Functions Samples</span>
+    <h1>Read a POST Body</h1>
+    <p>
+      Welcome, developer! This sample shows how a Function can read the body of an
+      HTTP <code>POST</code> request. Pick a content type, enter a body, and send it
+      to the <code>/echo</code> endpoint &mdash; the Function inspects the request and
+      describes what it received.
+    </p>
+
+    <div class="form">
+      <label for="content-type">Content type</label>
+      <select id="content-type">
+        <option value="application/json">application/json</option>
+        <option value="application/text">application/text</option>
+        <option value="text/html">text/html</option>
+        <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded (form)</option>
+      </select>
+
+      <label for="body">Request body</label>
+      <textarea id="body">{"greeting": "hello world"}</textarea>
+    </div>
+
+    <button class="btn" type="button" id="send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+      Send POST request
+    </button>
+
+    <pre class="result" id="result" role="status" aria-live="polite"></pre>
+
+    <footer>
+      <a href="https://github.com/akamai-developers/akamai-functions-samples"
+         target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.05.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/>
+        </svg>
+        Akamai Functions Samples
+      </a>
+    </footer>
+  </main>
+
+  <script>
+    var btn = document.getElementById('send');
+    var result = document.getElementById('result');
+
+    btn.addEventListener('click', async function () {
+      var contentType = document.getElementById('content-type').value;
+      var body = document.getElementById('body').value;
+
+      result.classList.add('show');
+      result.textContent = 'Sending…';
+
+      try {
+        var res = await fetch('/echo', {
+          method: 'POST',
+          headers: { 'content-type': contentType },
+          body: body
+        });
+        var text = await res.text();
+        result.textContent = text;
+      } catch (err) {
+        result.textContent = 'Request failed: ' + err;
+      }
+    });
+  </script>
+</body>
+
+</html>

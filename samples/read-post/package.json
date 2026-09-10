@@ -1,24 +1,25 @@
 {
-  "name": "read-post",
-  "version": "1.0.0",
-  "description": "Read data from a POST request",
-  "main": "index.js",
-  "scripts": {
-    "build": "node build.mjs && mkdirp dist && j2w -i build/bundle.js --initLocation http://api.localhost -o dist/api.wasm",
-    "build:debug": "node build.mjs && mkdirp dist && j2w -d -i build/bundle.js --initLocation http://api.localhost -o dist/api.wasm",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "esbuild": "^0.28.1",
-    "mkdirp": "^3.0.1",
-    "ts-loader": "^9.6.1",
-    "typescript": "^4.8.4"
-  },
-  "dependencies": {
-    "@spinframework/build-tools": "^1.0.7",
-    "@spinframework/wasi-http-proxy": "^1.0.1"
-  }
+    "name": "read-post",
+    "version": "1.0.0",
+    "description": "Read data from a POST request",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc --noEmit && node build.mjs",
+        "build:debug": "tsc --noEmit && node build.mjs --debug",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "mkdirp": "^3.0.1",
+        "ts-loader": "^9.4.1",
+        "typescript": "^7.0.2",
+        "esbuild": "^0.25.8",
+        "@bytecodealliance/jco": "^1.17.6"
+    },
+    "dependencies": {
+        "hono": "^4.13.7",
+        "@spinframework/wasi-http-proxy": "^2.0.0"
+    }
 }
