@@ -1,48 +1,55 @@
 // This example was adapted from Cloudflare Workers as a familiar starting point for
-// demonstrating how you can migrate your workload to a Spin app on Fermyon Wasm Functions.
+// demonstrating how you can migrate your workload to a Spin app on Akamai Functions
 // Source: https://developers.cloudflare.com/workers/examples/alter-headers/
 // The original example is provided by Cloudflare under the MIT License.
 
-import * as variables from "@spinframework/spin-variables"
+import { Context, Hono } from 'hono';
+import * as variables from '@spinframework/spin-variables';
+import { fire } from 'hono/service-worker';
+import { logger } from 'hono/logger';
 
-async function fetchAltered(request: Request): Promise<Response> {
-    const originHost = variables.get('origin_host');
-    if (!originHost) {
-        return internalServerError("Origin site not configured");
-    }
+// A fixed upstream path used by the /headers demo endpoint. The origin host is
+// configurable via the `origin_host` Spin variable (see spin.toml).
+const ORIGIN_PATH = '/animals/json';
 
-    let requestUrl = new URL(request.url);
+const app = new Hono();
 
-    // These are useful for local testing, where the protocol and port won't match upstream.
-    requestUrl.protocol = "https:";
-    requestUrl.port = "";
+app.use(logger());
+// Proxy a response from the origin and alter its headers on the way back.
+app.get('/headers', async (c: Context) => {
+  const originHost = variables.get('origin_host');
+  if (!originHost) {
+    return c.text('Origin site not configured', 500);
+  }
 
-    requestUrl.host = originHost;
+  const requestUrl = new URL(c.req.url);
+  // Point the request at the origin. Protocol/port are normalized so local
+  // testing (http, port 3000) still reaches the upstream over https.
+  requestUrl.protocol = 'https:';
+  requestUrl.port = '';
+  requestUrl.host = originHost;
+  requestUrl.pathname = ORIGIN_PATH;
 
-    const originResponse = await fetch(requestUrl.toString(), request);
+  const originResponse = await fetch(requestUrl.toString());
 
-    // This is needed to make the response mutable.
-    let response = new Response(originResponse.body, originResponse);
+  // Wrap the origin response so its headers become mutable.
+  const response = new Response(originResponse.body, originResponse);
 
-    // Add a header
-    response.headers.append("friendly-message", "Hello from FWF");
+  // Add a header
+  response.headers.append('friendly-message', 'Hello from Akamai Functions!');
 
-    // Delete a header
-    response.headers.delete("content-type");
+  // Delete a header
+  response.headers.delete('content-type');
 
-    // Modify a header
-    response.headers.set("date", "the eleventy-sixth of June");
+  // Modify a header
+  response.headers.set('date', 'the eleventy-sixth of June');
 
-    return response;
-}
-
-function internalServerError(message: string): Response {
-    return new Response(message, {
-        status: 500,
-    });
-}
-
-//@ts-ignore
-addEventListener('fetch', (event: FetchEvent) => {
-    event.respondWith(fetchAltered(event.request));
+  return response;
 });
+
+app.get("*", (c: Context) => {
+  c.status(404);
+  return c.text("Not Found")
+});
+
+fire(app, { fetch: undefined });

@@ -7,7 +7,7 @@ name = "alter-headers"
 version = "0.1.0"
 
 [variables]
-origin_host = { default = "random-data-api.fermyon.app"}
+origin_host = { default = "random-data-api.fermyon.app" }
 
 [[trigger.http]]
 route = "/..."
@@ -17,8 +17,11 @@ component = "alter-headers"
 source = "dist/alter-headers.wasm"
 exclude_files = ["**/node_modules"]
 allowed_outbound_hosts = ["https://{{ origin_host }}"]
+
 [component.alter-headers.variables]
 origin_host = "{{ origin_host }}"
+
 [component.alter-headers.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]
+
