@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Block by Country &middot; Akamai Functions</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141a2e;
+      --border: #26304d;
+      --text: #e7ebf5;
+      --muted: #9aa5c0;
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --ok: #14b8a6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 120px 1.5rem 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 1.0625rem;
+      background: radial-gradient(1200px 600px at 50% -10%, #3a1414 0%, var(--bg) 60%), var(--bg);
+      color: var(--text);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffb4b4;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1.9rem;
+      line-height: 1.2;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0.75rem 0;
+    }
+
+    .how {
+      margin: 1.5rem 0;
+      padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .how ol {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .how code {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      font-family: inherit;
+      border-radius: 10px;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .btn.secondary:hover { background: rgba(255, 255, 255, 0.06); }
+
+    .result {
+      margin-top: 1.5rem;
+      min-height: 1.5em;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      text-align: left;
+      font-size: 0.95rem;
+      color: var(--muted);
+      display: none;
+    }
+
+    .result.show { display: block; }
+    .result.allowed { border-color: rgba(20, 184, 166, 0.5); color: #a7f3ea; }
+    .result.blocked { border-color: rgba(239, 68, 68, 0.5); color: #ffb4b4; }
+    .result strong { color: var(--text); }
+
+    .note {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 1.75rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    footer a:hover { color: var(--text); }
+    footer a svg { width: 1em; height: 1em; }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <span class="badge">Akamai Functions Samples</span>
+    <h1>Block by Country</h1>
+    <p>
+      This sample blocks visitors whose country is on a blocklist. A single
+      Function resolves the client IP to a country and checks it against a list
+      kept in the key-value store.
+    </p>
+
+    <div class="how">
+      <ol>
+        <li>Your client IP (from <code>true-client-ip</code>) is resolved to a country via <code>ip-api.com</code>.</li>
+        <li>If that country is on the blocklist, <code>/check</code> responds with <code>403</code>.</li>
+        <li>Use the admin controls to add your own country or clear the list.</li>
+      </ol>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" onclick="check()">Check my access</button>
+      <button class="btn secondary" type="button" onclick="blockMine()">Block my country</button>
+      <button class="btn secondary" type="button" onclick="viewList()">View blocklist</button>
+      <button class="btn secondary" type="button" onclick="clearList()">Clear blocklist</button>
+    </div>
+
+    <div class="result" id="result" role="status" aria-live="polite"></div>
+
+    <p class="note">
+      Note: this demo relies on <code>ip-api.com</code>, which does not resolve
+      the loopback address <code>127.0.0.1</code>. It works once deployed behind
+      a real client IP.
+    </p>
+
+    <footer>
+      <a href="https://github.com/akamai-developers/akamai-functions-samples"
+         target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.05.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/>
+        </svg>
+        Akamai Functions Samples
+      </a>
+    </footer>
+  </main>
+
+  <script>
+    var box = document.getElementById('result');
+
+    function render(text, kind) {
+      box.className = 'result show' + (kind ? ' ' + kind : '');
+      box.innerHTML = text;
+    }
+
+    async function check() {
+      render('Checking your access&hellip;');
+      try {
+        var res = await fetch('/check');
+        var data = await res.json();
+        render('<strong>' + (data.allowed ? 'Allowed' : 'Blocked') + '</strong> &middot; ' +
+          (data.message || '') + (data.country ? ' (' + data.country + ')' : ''),
+          data.allowed ? 'allowed' : 'blocked');
+      } catch (e) {
+        render('Request failed: ' + e, 'blocked');
+      }
+    }
+
+    async function blockMine() {
+      render('Adding your country to the blocklist&hellip;');
+      try {
+        var res = await fetch('/admin/blocked-countries', { method: 'POST' });
+        var data = await res.json();
+        render('<strong>Blocklist updated</strong> &middot; ' + (data.message || ''));
+      } catch (e) {
+        render('Request failed: ' + e, 'blocked');
+      }
+    }
+
+    async function viewList() {
+      try {
+        var res = await fetch('/admin/blocked-countries');
+        var data = await res.json();
+        render('<strong>Blocked countries:</strong> ' +
+          (data.length ? data.join(', ') : '(none)'));
+      } catch (e) {
+        render('Request failed: ' + e, 'blocked');
+      }
+    }
+
+    async function clearList() {
+      try {
+        await fetch('/admin/blocked-countries', { method: 'DELETE' });
+        render('<strong>Blocklist cleared.</strong>');
+      } catch (e) {
+        render('Request failed: ' + e, 'blocked');
+      }
+    }
+  </script>
+</body>
+
+</html>

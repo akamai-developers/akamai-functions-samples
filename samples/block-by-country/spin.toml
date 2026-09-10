@@ -18,4 +18,4 @@ allowed_outbound_hosts = ["http://ip-api.com"]
 
 [component.block-by-country.build]
 command = ["npm install", "npm run build"]
-watch = ["src/**/*.js"]
+watch = ["src/**/*.ts", "src/**/*.html"]

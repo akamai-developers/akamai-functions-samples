@@ -1,18 +1,22 @@
 # Block by Client Country
 
-This sample illustrates how you could block clients from accessing a particular resource by maintaining an Country blocklist.
+This sample illustrates how you could block clients from accessing a particular resource by maintaining a country blocklist.
 
-For demonstration purposes, the blocklist could be accessed using the `/admin/blocked-countries` endpoints.
+Open the app root (`/`) in a browser for a small UI that explains the sample and lets you check your access, block your own country, view, or clear the blocklist. Under the hood the UI calls the endpoints below.
 
-The route `/` uses the `blockByCountry` middleware to validate incoming requests against the blocklist.
+- `GET /` — the demo UI.
+- `GET /check` — the protected resource. Returns `200` with `{ allowed, country, message }` when your country is not blocked, and `403` with the same shape when it is.
+- `GET /admin/blocked-countries` — list the blocked countries.
+- `POST /admin/blocked-countries` — add the caller's own country to the blocklist.
+- `DELETE /admin/blocked-countries` — clear the blocklist.
 
-Behind the covers, [ip-api.com](https://ip-api.com) is used to lookup the country using the IP address of the client.
+The blocklist is stored in the default key-value store. Behind the covers, [ip-api.com](https://ip-api.com) is used to look up the country from the client's IP address (taken from the `spin-client-addr`/`true-client-ip` headers).
 
-> **Caution**: This sample does not work when running on your local machine because `ip-api.com` does not respond to calls with a client IP address of `127.0.0.1`.
+> **Caution**: The country lookup does not work for a client IP of `127.0.0.1` because `ip-api.com` does not resolve the loopback address. When testing locally, pass a public IP via the `true-client-ip` header (see below).
 
 ## Deploy to FWF and Run the Spin App
 
-Once you've cloned the repository and moved to the `./samples/block-by-country`, install the dependencies, build and run the app:
+Once you've cloned the repository and moved to `./samples/block-by-country`, install the dependencies, build and run the app:
 
 ```console
 spin build
@@ -27,71 +31,58 @@ export APP_URL=<YOUR_APP_URL>
 
 ### Accessing the protected route
 
-Send a `GET` request to the `/` route, which will show the data if your IP is not blocked: 
+Send a `GET` request to `/check`, which returns the outcome as JSON. Pass a public IP via `true-client-ip` to simulate a client location:
 
 ```console
-curl -iX GET $APP_URL
+curl -iX GET -H 'true-client-ip: 8.8.8.8' $APP_URL/check
 
 HTTP/1.1 200 OK
 content-type: application/json
-content-length: 86
-date: Fri, 24 Jan 2025 13:02:50 GMT
 
-{"message":"If you can read this, you've successfully passed the blocking mechanism."}
+{"allowed":true,"country":"United States","message":"If you can read this, you've successfully passed the blocking mechanism."}
 ```
 
-### Block your own Country
+### Block your own country
 
-To block your own country, send a `POST` request to `/admin/blocked-countries`
+To block the country resolved from your (simulated) IP, send a `POST` request to `/admin/blocked-countries`:
 
 ```console
-curl -iX POST $APP_URL/admin/blocked-countries
+curl -iX POST -H 'true-client-ip: 8.8.8.8' $APP_URL/admin/blocked-countries
 
 HTTP/1.1 200 OK
 content-type: application/json
-content-length: 58
-date: Fri, 24 Jan 2025 13:01:21 GMT
 
-{"message":"Your Country (Germany) is already on the blocklist"}
+{"message":"Your country (United States) has been added to the blocklist.","blocklist":["United States"]}
 ```
 
-## Try to access the protected route again
+### Try to access the protected route again
 
-Again, send a `GET` request to `/`, this time you should see the request being blocked with a `401`:
+Send another `GET` to `/check` with the same IP — this time it is blocked with a `403`:
 
 ```console
-curl -iX GET $APP_URL
+curl -iX GET -H 'true-client-ip: 8.8.8.8' $APP_URL/check
 
-HTTP/1.1 401 Unauthorized
-content-length: 25
-content-type: text/plain;charset=UTF-8
-date: Fri, 24 Jan 2025 12:59:50 GMT
+HTTP/1.1 403 Forbidden
+content-type: application/json
 
-Sorry, your Country (Germany) is blocked
+{"allowed":false,"country":"United States","message":"Sorry, your country (United States) is blocked."}
 ```
 
-### Retrieve the Country blocklist
-
-To get the list of blocked countries send a `GET` request to `/admin/blocked-countries`
+### Retrieve the country blocklist
 
 ```console
 curl -iX GET $APP_URL/admin/blocked-countries
 
 HTTP/1.1 200 OK
 content-type: application/json
-content-length: 13
-date: Fri, 24 Jan 2025 13:02:02 GMT
 
-["Germany"]
+["United States"]
 ```
 
 ### Clear the country blocklist
-
-To clear the country blocklist, send a `DELETE` request to `/admin/blocked-countries`
 
 ```console
 curl -iX DELETE $APP_URL/admin/blocked-countries
 
 HTTP/1.1 204 No Content
-date: Fri, 24 Jan 2025 13:02:26 GMT
 ```
