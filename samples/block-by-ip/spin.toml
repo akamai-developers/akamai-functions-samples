@@ -17,4 +17,4 @@ key_value_stores = ["default"]
 
 [component.block-ip.build]
 command = ["npm install", "npm run build"]
-watch = ["src/**/*.js"]
+watch = ["src/**/*.ts", "src/**/*.html"]
