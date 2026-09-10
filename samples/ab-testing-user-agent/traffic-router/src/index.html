@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Variant B &middot; Akamai Functions</title>
+  <title>A/B Testing &middot; Akamai Functions</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -12,8 +12,8 @@
       --border: #26304d;
       --text: #e7ebf5;
       --muted: #9aa5c0;
-      --accent: #a855f7;
-      --accent-hover: #9333ea;
+      --accent: #4f8cff;
+      --accent-hover: #3a76e6;
     }
 
     * { box-sizing: border-box; }
@@ -27,7 +27,7 @@
       padding: 200px 1.5rem 1.5rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 1.0625rem;
-      background: radial-gradient(1200px 600px at 50% -10%, #331b52 0%, var(--bg) 60%), var(--bg);
+      background: radial-gradient(1200px 600px at 50% -10%, #1a2748 0%, var(--bg) 60%), var(--bg);
       color: var(--text);
     }
 
@@ -48,24 +48,16 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #d3adff;
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: var(--accent);
+      background: rgba(79, 140, 255, 0.12);
+      border: 1px solid rgba(79, 140, 255, 0.3);
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
     }
 
-    .variant {
-      margin: 1.25rem 0 0.5rem;
-      font-size: 3rem;
-      line-height: 1;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
     h1 {
-      margin: 0.25rem 0 0.5rem;
-      font-size: 1.5rem;
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1.9rem;
       line-height: 1.2;
     }
 
@@ -75,7 +67,23 @@
       margin: 0.75rem 0;
     }
 
-    p code {
+    .how {
+      margin: 1.5rem 0;
+      padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .how ol {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .how code {
       color: var(--text);
       background: rgba(255, 255, 255, 0.06);
       padding: 0.1rem 0.4rem;
@@ -87,12 +95,12 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       padding: 0.85rem 1.5rem;
       background: var(--accent);
-      color: #1e0b33;
+      color: #fff;
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 1rem;
       border-radius: 10px;
       transition: background 0.15s ease, transform 0.05s ease;
@@ -124,24 +132,29 @@
 
 <body>
   <main class="card">
-    <span class="badge">Origin B</span>
-    <div class="variant">Variant B</div>
-    <h1>You are seeing the experiment experience</h1>
+    <span class="badge">Akamai Functions Samples</span>
+    <h1>User-Agent-based A/B Testing</h1>
     <p>
-      This request was routed to <code>origin-b</code> because the request
-      <code>counter</code> in the key-value store landed on an <strong>even</strong> value.
-    </p>
-    <p>
-      Reload to increment the counter to an odd value and your next visit
-      will land on <strong>Variant A</strong> again.
+      Welcome, developer! This sample shows how to run A/B testing at the edge
+      based on the visitor's <code>User-Agent</code>. A single Function inspects
+      each request and transparently routes it to one of two origins.
     </p>
 
-    <a class="btn" href="/index.html">
+    <div class="how">
+      <ol>
+        <li>The Function reads the <code>User-Agent</code> header from your request.</li>
+        <li>If it contains <code>Chrome</code> or <code>Safari</code>, the request is served from <code>origin-b</code> (Variant B).</li>
+        <li>Every other user agent is served from <code>origin-a</code> (Variant A).</li>
+      </ol>
+    </div>
+
+    <p>Try it out &mdash; the variant you see depends on the browser you use:</p>
+    <a class="btn" href="/by-user-agent">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M11 18l-6-6 6-6" />
+        <path d="M5 12h14M13 6l6 6-6 6" />
       </svg>
-      Back to overview
+      Route Requests by User Agent
     </a>
 
     <footer>

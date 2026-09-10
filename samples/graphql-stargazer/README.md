@@ -2,7 +2,7 @@
 
 This sample illustrates how to send GraphQL queries using a popular Rust library.
 
-The code runs a simple query for a repository's number of stars, and renders the result as a bare-bones HTML page.
+The landing page (served at `/`) offers a small form to enter a repository owner and name. Submitting it redirects to `/stargazers/<owner>/<repo>`, where the component runs a simple query for the repository's number of stars and renders the result as an HTML page.
 
 It needs a GH API token to work.
 
@@ -17,7 +17,7 @@ spin build
 SPIN_VARIABLE_GH_API_TOKEN=[your API token] spin up
 ```
 
-You can now visit the page, e.g. by opening this URL in a browser: http://localhost:3000/spinframework/spin. If you're getting an error, make sure that you provided a valid GitHub API token.
+You can now open http://localhost:3000/ in a browser, enter an owner and repository name, and submit the form. You can also skip the form and navigate directly to a repository, e.g. http://localhost:3000/stargazers/spinframework/spin. If you're getting an error, make sure that you provided a valid GitHub API token.
 
 ## Deploy to FWF and Run the Spin App
 

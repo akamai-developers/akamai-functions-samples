@@ -1,5 +1,7 @@
-use spin_sdk::http::{IntoResponse, Request, Response};
-use spin_sdk::http_component;
+use bytes::Bytes;
+use spin_sdk::http::body::IncomingBodyExt;
+use spin_sdk::http::{FullBody, IntoResponse, Method, Request, Response};
+use spin_sdk::http_service;
 use image::{
     ImageFormat, DynamicImage,
     codecs::{
@@ -9,7 +11,6 @@ use image::{
 };
 
 use std::io::Cursor;
-use url::Url;
 // We use image-webp for WebP encoding since the main image crate doesn't support lossless encoding or quality control for WebP yet
 use image_webp::{WebPEncoder, EncoderParams, ColorType};
 
@@ -23,25 +24,46 @@ use image_webp::{WebPEncoder, EncoderParams, ColorType};
 /// - lossless: true/false (default: false, only applies to WebP)
 /// 
 /// Example: POST /convert?format=webp&width=800&quality=85
-#[http_component]
-fn handle_image_conversion(req: Request) -> anyhow::Result<impl IntoResponse> {
-    match process_image(req) {
-        Ok(response) => Ok(response),
-        Err(e) => {
-            eprintln!("Error processing image: {}", e);
-            Ok(Response::builder()
-                .status(500)
-                .header("content-type", "application/json")
-                .body(format!(r#"{{"error": "{}"}}"#, e))
-                .build())
-        }
+///
+/// Routing:
+/// - GET  /            -> the demo UI (src/index.html)
+/// - GET  /index.html  -> the demo UI (src/index.html)
+/// - POST /convert     -> convert the posted image and stream it back
+#[http_service]
+async fn handle_image_conversion(req: Request) -> anyhow::Result<impl IntoResponse> {
+    let method = req.method().clone();
+    let path = req.uri().path().to_string();
+
+    match (method, path.as_str()) {
+        (Method::GET, "/") | (Method::GET, "/index.html") => Ok(Response::builder()
+            .status(200)
+            .header("content-type", "text/html")
+            .body(FullBody::new(Bytes::from(include_str!("index.html"))))
+            .unwrap()),
+        (Method::POST, "/convert") => match process_image(req).await {
+            Ok(response) => Ok(response),
+            Err(e) => {
+                eprintln!("Error processing image: {}", e);
+                Ok(Response::builder()
+                    .status(500)
+                    .header("content-type", "application/json")
+                    .body(FullBody::new(Bytes::from(format!(r#"{{"error": "{}"}}"#, e))))
+                    .unwrap())
+            }
+        },
+        _ => Ok(Response::builder()
+            .status(404)
+            .header("content-type", "application/json")
+            .body(FullBody::new(Bytes::from_static(
+                br#"{"error": "Not found", "hint": "GET / for the demo UI, POST /convert to convert an image"}"#,
+            )))
+            .unwrap()),
     }
 }
 
-fn process_image(req: Request) -> anyhow::Result<Response> {
-    let parsed_url = Url::parse(req.uri())
-        .map_err(|e| anyhow::anyhow!("Failed to parse URI: {}", e))?;
-    
+async fn process_image(req: Request) -> anyhow::Result<Response<FullBody<Bytes>>> {
+    let query = req.uri().query().unwrap_or("").to_string();
+
     let mut output_format = "png".to_string();
     let mut width = None;
     let mut height = None;
@@ -49,7 +71,7 @@ fn process_image(req: Request) -> anyhow::Result<Response> {
     let mut lossless = false;
     let mut validation_errors = Vec::new();
     
-    for (key, value) in parsed_url.query_pairs() {
+    for (key, value) in url::form_urlencoded::parse(query.as_bytes()) {
         match key.as_ref() {
             "format" => output_format = value.to_string(),
             "width" => {
@@ -88,21 +110,22 @@ fn process_image(req: Request) -> anyhow::Result<Response> {
         return Ok(Response::builder()
             .status(400)
             .header("content-type", "application/json")
-            .body(format!(r#"{{"error": "Validation failed", "details": {}}}"#, 
-                serde_json::to_string(&validation_errors).unwrap_or_else(|_| "[]".to_string())))
-            .build());
+            .body(FullBody::new(Bytes::from(format!(r#"{{"error": "Validation failed", "details": {}}}"#,
+                serde_json::to_string(&validation_errors).unwrap_or_else(|_| "[]".to_string())))))
+            .unwrap());
     }
-    
-    let image_data = req.body();
-    
+
+    let image_data = req.into_body().bytes().await
+        .map_err(|e| anyhow::anyhow!("Failed to read request body: {}", e))?;
+
     if image_data.is_empty() {
         return Ok(Response::builder()
             .status(400)
             .header("content-type", "application/json")
-            .body(r#"{"error": "No image data provided", "hint": "Send image as POST body with optional query params: ?format=png&width=800&height=600&quality=90"}"#)
-            .build());
+            .body(FullBody::new(Bytes::from_static(br#"{"error": "No image data provided", "hint": "Send image as POST body with optional query params: ?format=png&width=800&height=600&quality=90"}"#)))
+            .unwrap());
     }
-    
+
     // Load the image and autodetect format
     let mut img = image::load_from_memory(image_data.as_ref())
         .map_err(|e| anyhow::anyhow!("Failed to load image - invalid or unsupported format: {}", e))?;
@@ -120,8 +143,8 @@ fn process_image(req: Request) -> anyhow::Result<Response> {
         _ => return Ok(Response::builder()
             .status(400)
             .header("content-type", "application/json")
-            .body(format!(r#"{{"error": "Unsupported format: {}", "supported_formats": ["png", "jpeg", "webp", "gif", "bmp", "ico", "tiff"]}}"#, output_format))
-            .build()),
+            .body(FullBody::new(Bytes::from(format!(r#"{{"error": "Unsupported format: {}", "supported_formats": ["png", "jpeg", "webp", "gif", "bmp", "ico", "tiff"]}}"#, output_format))))
+            .unwrap()),
     };
     
     let mut output = Vec::new();
@@ -170,8 +193,8 @@ fn process_image(req: Request) -> anyhow::Result<Response> {
     Ok(Response::builder()
         .status(200)
         .header("content-type", content_type)
-        .body(output)
-        .build())
+        .body(FullBody::new(Bytes::from(output)))
+        .unwrap())
 }
 
 fn resize_image(img: DynamicImage, width: Option<u32>, height: Option<u32>) -> anyhow::Result<DynamicImage> {

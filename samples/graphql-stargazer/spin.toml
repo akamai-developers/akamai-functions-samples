@@ -14,9 +14,9 @@ route = "/..."
 component = "graphql"
 
 [component.graphql]
-source = "target/wasm32-wasip1/release/graphql.wasm"
+source = "target/wasm32-wasip2/release/graphql.wasm"
 allowed_outbound_hosts = ["https://api.github.com"]
 variables = { gh_api_token = "{{ gh_api_token }}" }
 [component.graphql.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 watch = ["src/**/*.rs", "Cargo.toml"]

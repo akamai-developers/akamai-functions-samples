@@ -7,7 +7,7 @@ authors = ["Thorsten Hans <thorsten.hans@fermyon.com>"]
 description = ""
 
 [variables]
-upstream_url = { default = "https://www.fermyon.com" }
+upstream_url = { default = "https://developers.akamai.com/" }
 use_kv_store = { default = "true" }
 ttl_in_minutes = { default = "1" }
 
@@ -16,7 +16,7 @@ route = "/..."
 component = "html-rewrite"
 
 [component.html-rewrite]
-source = "target/wasm32-wasip1/release/html_rewrite.wasm"
+source = "target/wasm32-wasip2/release/html_rewrite.wasm"
 allowed_outbound_hosts = ["{{ upstream_url }}"]
 key_value_stores = ["default"]
 
@@ -26,5 +26,5 @@ use_kv_store = "{{ use_kv_store }}"
 ttl_in_minutes = "{{ ttl_in_minutes }}"
 
 [component.html-rewrite.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 watch = ["src/**/*.rs", "Cargo.toml"]

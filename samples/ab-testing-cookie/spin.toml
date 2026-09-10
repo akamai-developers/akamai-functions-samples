@@ -3,7 +3,7 @@ spin_manifest_version = 2
 [application]
 name = "ab-testing-cookie"
 version = "0.1.0"
-authors = ["Thorsten Hans <thorsten.hans@fermyon.com>"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 description = ""
 
 [[trigger.http]]
@@ -19,20 +19,20 @@ route = "/origin-b/..."
 component = "origin-b"
 
 [component.traffic-router]
-source = "traffic-router/target/wasm32-wasip1/release/traffic_router.wasm"
-allowed_outbound_hosts = ["http://self", "https://self"]
+source = "traffic-router/target/wasm32-wasip2/release/traffic_router.wasm"
+allowed_outbound_hosts = ["http://self.alt", "https://self.alt"]
 
 [component.traffic-router.build]
 workdir = "traffic-router"
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.origin-a]
-source = "origin-a/target/wasm32-wasip1/release/origin_a.wasm"
+source = "origin-a/target/wasm32-wasip2/release/origin_a.wasm"
 allowed_outbound_hosts = []
 
 [component.origin-a.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 workdir = "origin-a"
 watch = ["src/**/*.rs", "Cargo.toml"]
 

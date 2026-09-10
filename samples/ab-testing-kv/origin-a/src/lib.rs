@@ -1,17 +1,29 @@
-use anyhow::Result;
-use spin_sdk::http::{IntoResponse, Params, Request, ResponseBuilder, Router};
-use spin_sdk::http_component;
+use bytes::Bytes;
+use spin_sdk::http::{FullBody, IntoResponse, Method, Request, Response, StatusCode};
+use spin_sdk::http_service;
 
-#[http_component]
-fn handle_origin_a(req: Request) -> anyhow::Result<impl IntoResponse> {
-    let mut router = Router::default();
-    router.get("/origin-a/by-key-value.html", get_key_value_response);
-    Ok(router.handle(req))
+#[http_service]
+async fn handle_origin_a(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() != Method::GET {
+        return Ok(Response::builder()
+            .status(StatusCode::METHOD_NOT_ALLOWED)
+            .body(FullBody::default())
+            .unwrap());
+    }
+    Ok(match req.uri().path().to_lowercase().as_str() {
+        "/origin-a/by-key-value.html" => send_page(),
+        _ => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(FullBody::default())
+            .unwrap(),
+    })
 }
 
-fn get_key_value_response(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    Ok(ResponseBuilder::new(200)
+fn send_page() -> Response<FullBody<Bytes>> {
+    let page = include_str!("by-key-value.html");
+    Response::builder()
+        .status(StatusCode::OK)
         .header("content-type", "text/html")
-        .body("<html><head>  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Variant A</title></head><body><h1>Variant A</h1><h2>Request has been routed here because of a value in KV</h2></body></html>")
-        .build())
+        .body(FullBody::new(Bytes::from(page)))
+        .unwrap()
 }

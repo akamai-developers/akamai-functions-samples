@@ -6,6 +6,7 @@
 set -e
 
 BASE_URL="http://localhost:3000"
+CONVERT_URL="$BASE_URL/convert"
 INPUT_FILE="input.jpg"
 OUTPUT_DIR="test_output"
 SPIN_PID=""
@@ -145,7 +146,7 @@ test_conversion() {
     
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     
-    local http_code=$(curl -s -X POST --data-binary @"$INPUT_FILE" "${BASE_URL}${query_params}" -o "$OUTPUT_DIR/$output_file" -w "%{http_code}" 2>&1)
+    local http_code=$(curl -s -X POST --data-binary @"$INPUT_FILE" "${CONVERT_URL}${query_params}" -o "$OUTPUT_DIR/$output_file" -w "%{http_code}" 2>&1)
     
     if echo "$http_code" | grep -q "200"; then
         local file_type=$(file -b "$OUTPUT_DIR/$output_file")
@@ -206,7 +207,7 @@ test_error() {
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     
     local response_file="$OUTPUT_DIR/error_response_$$.txt"
-    response=$(curl -s -X POST --data-binary @"$INPUT_FILE" "${BASE_URL}${query_params}" -w "%{http_code}" -o "$response_file" 2>/dev/null)
+    response=$(curl -s -X POST --data-binary @"$INPUT_FILE" "${CONVERT_URL}${query_params}" -w "%{http_code}" -o "$response_file" 2>/dev/null)
     if [ "$response" = "$expected_status" ]; then
         echo -e "[${GREEN}✓${NC}] $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))
@@ -230,7 +231,7 @@ test_empty_error() {
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     
     local response_file="$OUTPUT_DIR/error_response_$$.txt"
-    response=$(curl -s -X POST "${BASE_URL}" -w "%{http_code}" -o "$response_file" 2>/dev/null)
+    response=$(curl -s -X POST "${CONVERT_URL}" -w "%{http_code}" -o "$response_file" 2>/dev/null)
     if [ "$response" = "$expected_status" ]; then
         echo -e "[${GREEN}✓${NC}] $test_name"
         PASSED_TESTS=$((PASSED_TESTS + 1))

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Variant B &middot; Akamai Functions</title>
+  <title>GitHub Stargazers &middot; Akamai Functions</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -12,8 +12,8 @@
       --border: #26304d;
       --text: #e7ebf5;
       --muted: #9aa5c0;
-      --accent: #a855f7;
-      --accent-hover: #9333ea;
+      --accent: #f5b301;
+      --accent-hover: #d99e00;
     }
 
     * { box-sizing: border-box; }
@@ -27,7 +27,7 @@
       padding: 200px 1.5rem 1.5rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 1.0625rem;
-      background: radial-gradient(1200px 600px at 50% -10%, #331b52 0%, var(--bg) 60%), var(--bg);
+      background: radial-gradient(1200px 600px at 50% -10%, #3a2e0a 0%, var(--bg) 60%), var(--bg);
       color: var(--text);
     }
 
@@ -48,24 +48,16 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #d3adff;
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #ffd766;
+      background: rgba(245, 179, 1, 0.14);
+      border: 1px solid rgba(245, 179, 1, 0.4);
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
     }
 
-    .variant {
-      margin: 1.25rem 0 0.5rem;
-      font-size: 3rem;
-      line-height: 1;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
     h1 {
-      margin: 0.25rem 0 0.5rem;
-      font-size: 1.5rem;
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1.9rem;
       line-height: 1.2;
     }
 
@@ -75,25 +67,66 @@
       margin: 0.75rem 0;
     }
 
-    p code {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.06);
-      padding: 0.1rem 0.4rem;
-      border-radius: 6px;
-      font-size: 0.9em;
+    form {
+      margin-top: 1.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: stretch;
     }
+
+    .field {
+      flex: 1 1 200px;
+      text-align: left;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      font-size: 1rem;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .field input::placeholder { color: rgba(154, 165, 192, 0.6); }
 
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
-      margin-top: 1rem;
+      flex: 1 1 100%;
+      margin-top: 0.5rem;
       padding: 0.85rem 1.5rem;
       background: var(--accent);
-      color: #1e0b33;
+      color: #2b2205;
+      border: none;
+      cursor: pointer;
       text-decoration: none;
       font-weight: 700;
       font-size: 1rem;
+      font-family: inherit;
       border-radius: 10px;
       transition: background 0.15s ease, transform 0.05s ease;
     }
@@ -124,25 +157,33 @@
 
 <body>
   <main class="card">
-    <span class="badge">Origin B</span>
-    <div class="variant">Variant B</div>
-    <h1>You are seeing the experiment experience</h1>
+    <span class="badge">Akamai Functions Samples</span>
+    <h1>&#11088; GitHub Stargazers</h1>
     <p>
-      This request was routed to <code>origin-b</code> because the request
-      <code>counter</code> in the key-value store landed on an <strong>even</strong> value.
-    </p>
-    <p>
-      Reload to increment the counter to an odd value and your next visit
-      will land on <strong>Variant A</strong> again.
+      Enter a repository owner and name below. On submit you'll be routed to
+      <code>/stargazers/&lt;owner&gt;/&lt;repo&gt;</code>, where a Spin Function
+      queries the GitHub GraphQL API and renders the current star count.
     </p>
 
-    <a class="btn" href="/index.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M11 18l-6-6 6-6" />
-      </svg>
-      Back to overview
-    </a>
+    <form id="lookup">
+      <div class="field">
+        <label for="owner">Owner</label>
+        <input id="owner" name="owner" type="text" placeholder="spinframework" value="spinframework"
+               autocomplete="off" autocapitalize="off" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label for="repo">Repository</label>
+        <input id="repo" name="repo" type="text" placeholder="spin" value="spin"
+               autocomplete="off" autocapitalize="off" spellcheck="false" required>
+      </div>
+      <button class="btn" type="submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+        View stargazers
+      </button>
+    </form>
 
     <footer>
       <a href="https://github.com/akamai-developers/akamai-functions-samples"
@@ -154,6 +195,17 @@
       </a>
     </footer>
   </main>
+
+  <script>
+    document.getElementById('lookup').addEventListener('submit', function (event) {
+      event.preventDefault();
+      var owner = document.getElementById('owner').value.trim();
+      var repo = document.getElementById('repo').value.trim();
+      if (!owner || !repo) return;
+      window.location.href =
+        '/stargazers/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo);
+    });
+  </script>
 </body>
 
 </html>

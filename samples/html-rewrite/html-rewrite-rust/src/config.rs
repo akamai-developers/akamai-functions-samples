@@ -7,12 +7,15 @@ pub(crate) struct Config {
 }
 
 impl Config {
-    pub fn load() -> anyhow::Result<Self> {
-        let url = variables::get("upstream_url")?;
+    pub async fn load() -> anyhow::Result<Self> {
+        let url = variables::get("upstream_url").await?;
         let use_kv = variables::get("use_kv_store")
-            .and_then(|v| Ok(v == "true"))
+            .await
+            .map(|v| v == "true")
             .unwrap_or_default();
-        let ttl = variables::get("ttl_in_minutes").map(|v| v.parse::<u64>().unwrap())?;
+        let ttl = variables::get("ttl_in_minutes")
+            .await
+            .map(|v| v.parse::<u64>().unwrap())?;
 
         Ok(Self {
             ttl_in_minutes: ttl,

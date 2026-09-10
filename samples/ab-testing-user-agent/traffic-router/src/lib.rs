@@ -1,71 +1,97 @@
-use anyhow::Result;
+use bytes::Bytes;
+use spin_sdk::http::body::IncomingBodyExt;
 use spin_sdk::http::{
-    send, IntoResponse, Params, Request, RequestBuilder, Response, ResponseBuilder, Router,
+    EmptyBody, FullBody, IntoResponse, Method, Request, Response, StatusCode, send,
 };
-use spin_sdk::http_component;
+use spin_sdk::http_service;
 
+const ORIGIN_REQUEST_PATH: &str = "by-user-agent.html";
 const ORIGIN_A: &str = "origin-a";
 const ORIGIN_B: &str = "origin-b";
 
-#[http_component]
-fn handle_ab_testing(req: Request) -> anyhow::Result<impl IntoResponse> {
-    let mut router = Router::default();
-    router.get("/", redirect_to_index);
-    router.get("/index.html", route_index);
-    router.get_async("/by-user-agent", route_by_user_agent);
-    Ok(router.handle(req))
-}
-
-fn redirect_to_index(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    Ok(ResponseBuilder::new(301)
-        .header("Location", "/index.html")
-        .body(())
-        .build())
-}
-fn route_index(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    const INDEX_PAGE: &str = r#"<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>A/B Testing</title>
-</head>
-
-<body>
-    <h1>A/B Testing Sample</h1>
-    <ul>
-        <li><a href="/by-user-agent">Route Requests by User Agent</a> - Chrome and Safari user agents will be routed to Variant B instead of A</li>
-    </ul>
-</body>
-
-</html>
-"#;
-    Ok(ResponseBuilder::new(200)
-        .header("content-type", "text/html")
-        .body(INDEX_PAGE)
-        .build())
-}
-
-async fn route_by_user_agent(req: Request, _: Params) -> Result<impl IntoResponse> {
-    const ORIGIN_REQUEST_PATH: &str = "by-user-agent.html";
-    let Some(user_agent_header_value) = req.header("user-agent") else {
-        return Ok(Response::new(400, "user-agent header not present"));
-    };
-    let Some(user_agent) = user_agent_header_value.as_str() else {
-        return Ok(Response::new(400, "user-agent header is empty"));
-    };
-
-    let mut origin_route = build_request_url(ORIGIN_A, ORIGIN_REQUEST_PATH);
-    println!("{}", user_agent);
-    if user_agent.contains("Chrome") || user_agent.contains("Safari") {
-        origin_route = build_request_url(ORIGIN_B, ORIGIN_REQUEST_PATH);
+#[http_service]
+async fn handle_ab_testing(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() != Method::GET {
+        return Ok(Response::builder()
+            .status(StatusCode::METHOD_NOT_ALLOWED)
+            .body(FullBody::default())
+            .unwrap());
     }
-    let origin_req = RequestBuilder::new(spin_sdk::http::Method::Get, origin_route).build();
-    let response: Response = send(origin_req).await?;
-    Ok(response)
+    let res = match req.uri().path().to_lowercase().as_str() {
+        "/index.html" => send_index(),
+        "/by-user-agent" => send_a_or_b(&req).await,
+        "/" => send_redirect_to("/index.html"),
+        _ => send_not_found(),
+    };
+    Ok(res)
 }
 
-fn build_request_url(origin: &str, path: &str) -> String {
-    format!("/{}/{}", origin, path)
+fn send_redirect_to(target: &str) -> Response<FullBody<Bytes>> {
+    Response::builder()
+        .status(301)
+        .header("location", target)
+        .body(FullBody::default())
+        .unwrap()
+}
+
+fn send_not_found() -> Response<FullBody<Bytes>> {
+    Response::builder()
+        .status(StatusCode::NOT_FOUND)
+        .body(FullBody::default())
+        .unwrap()
+}
+
+fn send_index() -> Response<FullBody<Bytes>> {
+    let index = include_str!("index.html");
+    Response::builder()
+        .status(200)
+        .header("content-type", "text/html")
+        .body(FullBody::new(Bytes::from(index)))
+        .unwrap()
+}
+
+async fn send_a_or_b(req: &Request) -> Response<FullBody<Bytes>> {
+    let user_agent = match req.headers().get("user-agent") {
+        Some(header) => match header.to_str() {
+            Ok(value) => value.to_string(),
+            Err(_) => return send_bad_request("user-agent header is empty"),
+        },
+        None => return send_bad_request("user-agent header not present"),
+    };
+
+    println!("{user_agent}");
+
+    let origin = if user_agent.contains("Chrome") || user_agent.contains("Safari") {
+        ORIGIN_B
+    } else {
+        ORIGIN_A
+    };
+
+    let origin_req = Request::builder()
+        .method(Method::GET)
+        .uri(build_request_url(req, origin))
+        .body(EmptyBody::new())
+        .unwrap();
+    let origin_response: Response = send(origin_req).await.unwrap();
+
+    let response_bytes = origin_response.into_body().bytes().await.unwrap();
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("content-type", "text/html")
+        .body(FullBody::new(response_bytes))
+        .unwrap()
+}
+
+fn send_bad_request(message: &str) -> Response<FullBody<Bytes>> {
+    Response::builder()
+        .status(StatusCode::BAD_REQUEST)
+        .body(FullBody::new(Bytes::from(message.to_string())))
+        .unwrap()
+}
+
+fn build_request_url(incoming_req: &Request, outgoing_simulated_origin: &str) -> String {
+    format!(
+        "{}://self.alt/{outgoing_simulated_origin}/{ORIGIN_REQUEST_PATH}",
+        incoming_req.uri().scheme_str().unwrap_or("https"),
+    )
 }

@@ -1,26 +1,21 @@
-async function aggregateJson(): Promise<Response> {
-    const host = "https://random-data-api.fermyon.app";
+import { Hono } from 'hono';
+import { fire } from 'hono/service-worker';
 
-    const animalsUrl = host + "/animals/json";
-    const physicsUrl = host + "/physics/json";
+const RANDOM_DATA_API = 'https://random-data-api.fermyon.app';
 
-    // Make the upstream requests in parallel and await the responses.
-    const responses = await Promise.all([fetch(animalsUrl), fetch(physicsUrl)]);
+const app = new Hono();
 
-    // Parse the upstream response bodies into JSON, and pull out the data
-    // we need for our own response. In this case we extract a single property
-    // and collect the values in an array.
-    const bodies = await Promise.all(responses.map(r => r.json()));
-    const facts = bodies.map(json => json.fact);
+app.get('/api/facts', async (c) => {
+  const animalsUrl = `${RANDOM_DATA_API}/animals/json`;
+  const physicsUrl = `${RANDOM_DATA_API}/physics/json`;
 
-    // Serialise the response to JSON and return it.
-    const response = JSON.stringify(facts, null, 2);
-    return new Response(response, {
-        headers: { "content-type": "application/json" }
-    });
-}
+  const responses = await Promise.all([fetch(animalsUrl), fetch(physicsUrl)]);
+  const bodies = await Promise.all(
+    responses.map((r) => r.json() as Promise<{ fact: string }>)
+  );
+  const facts = bodies.map((json) => json.fact);
 
-//@ts-ignore
-addEventListener('fetch', (event: FetchEvent) => {
-    event.respondWith(aggregateJson());
+  return c.json(facts);
 });
+
+fire(app)

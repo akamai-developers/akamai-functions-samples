@@ -13,8 +13,8 @@ route = "/..."
 component = "image-conversion"
 
 [component.image-conversion]
-source = "target/wasm32-wasip1/release/image_conversion.wasm"
+source = "target/wasm32-wasip2/release/image_conversion.wasm"
 allowed_outbound_hosts = []
 [component.image-conversion.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 watch = ["src/**/*.rs", "Cargo.toml"]

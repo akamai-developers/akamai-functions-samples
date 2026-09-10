@@ -26,15 +26,25 @@ spin up
 
 The service will be available at `http://localhost:3000`
 
+## Demo UI
+
+Open `http://localhost:3000` in a browser for an interactive demo: pick (or drag &
+drop) an image, choose the target format, size, and quality, and the conversion runs
+on the edge Function. The original and converted images are shown side by side with
+timing and output size, and the result can be downloaded directly.
+
+The UI simply `POST`s the selected file to the `/convert` endpoint documented below.
+
 ## Usage
 
-Send a POST request with the image data in the request body and specify conversion parameters via query parameters.
+Send a POST request to `/convert` with the image data in the request body and specify
+conversion parameters via query parameters.
 
 ### Basic Conversion
 
 Convert JPEG to PNG (default):
 ```bash
-curl -X POST --data-binary @input.jpg http://localhost:3000 -o output.png
+curl -X POST --data-binary @input.jpg http://localhost:3000/convert -o output.png
 ```
 
 ### Format Conversion
@@ -42,28 +52,28 @@ curl -X POST --data-binary @input.jpg http://localhost:3000 -o output.png
 Convert to JPEG with quality setting:
 ```bash
 curl -X POST --data-binary @input.png \
-  "http://localhost:3000?format=jpeg&quality=85" \
+  "http://localhost:3000/convert?format=jpeg&quality=85" \
   -o output.jpg
 ```
 
 Convert to WebP with quality control:
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?format=webp&quality=90" \
+  "http://localhost:3000/convert?format=webp&quality=90" \
   -o output.webp
 ```
 
 Convert to WebP lossless:
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?format=webp&lossless=true" \
+  "http://localhost:3000/convert?format=webp&lossless=true" \
   -o output.webp
 ```
 
 Convert to PNG with compression:
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?format=png&quality=85" \
+  "http://localhost:3000/convert?format=png&quality=85" \
   -o output.png
 ```
 
@@ -72,21 +82,21 @@ curl -X POST --data-binary @input.jpg \
 Resize by width (maintains aspect ratio):
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?width=800" \
+  "http://localhost:3000/convert?width=800" \
   -o output.png
 ```
 
 Resize by height (maintains aspect ratio):
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?height=600" \
+  "http://localhost:3000/convert?height=600" \
   -o output.png
 ```
 
 Resize to exact dimensions:
 ```bash
 curl -X POST --data-binary @input.jpg \
-  "http://localhost:3000?width=1024&height=768" \
+  "http://localhost:3000/convert?width=1024&height=768" \
   -o output.png
 ```
 
@@ -95,7 +105,7 @@ curl -X POST --data-binary @input.jpg \
 Resize and convert with quality control:
 ```bash
 curl -X POST --data-binary @input.png \
-  "http://localhost:3000?format=jpeg&width=640&quality=90" \
+  "http://localhost:3000/convert?format=jpeg&width=640&quality=90" \
   -o output.jpg
 ```
 
@@ -104,7 +114,7 @@ curl -X POST --data-binary @input.png \
 ### Endpoint
 
 ```
-POST /
+POST /convert
 ```
 
 ### Query Parameters

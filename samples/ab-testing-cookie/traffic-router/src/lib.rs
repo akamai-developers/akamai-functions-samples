@@ -1,81 +1,85 @@
-use anyhow::Result;
+use bytes::Bytes;
+use spin_sdk::http::body::IncomingBodyExt;
 use spin_sdk::http::{
-    send, IntoResponse, Method, Params, Request, RequestBuilder, Response, ResponseBuilder, Router,
+    EmptyBody, FullBody, IntoResponse, Method, Request, Response, StatusCode, send,
 };
-use spin_sdk::http_component;
+use spin_sdk::http_service;
 
+const ORIGIN_REQUEST_PATH: &str = "by-cookie.html";
 const ORIGIN_A: &str = "origin-a";
 const ORIGIN_B: &str = "origin-b";
+const ROUTING_COOKIE_NAME: &str = "AKAMAI_FUNCTIONS_AB";
 
-#[http_component]
-fn handle_ab_testing(req: Request) -> anyhow::Result<impl IntoResponse> {
-    let mut router = Router::default();
-    router.get("/", redirect_to_index);
-    router.get("/index.html", route_index);
-    router.get_async("/by-cookie", route_by_cookie);
-    Ok(router.handle(req))
+#[http_service]
+async fn handle_ab_testing(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() != Method::GET {
+        return Ok(Response::builder()
+            .status(StatusCode::METHOD_NOT_ALLOWED)
+            .body(FullBody::default())
+            .unwrap());
+    }
+    let res = match req.uri().path().to_lowercase().as_str() {
+        "/index.html" => send_index(),
+        "/by-cookie" => send_a_or_b(&req).await,
+        _ => send_redirect_to("/index.html"),
+    };
+    Ok(res)
 }
 
-fn redirect_to_index(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    Ok(ResponseBuilder::new(301)
-        .header("Location", "/index.html")
-        .body(())
-        .build())
+fn send_redirect_to(target: &str) -> Response<FullBody<Bytes>> {
+    Response::builder()
+        .status(308)
+        .header("location", target)
+        .body(FullBody::default())
+        .unwrap()
 }
-fn route_index(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    const INDEX_PAGE: &str = r#"<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>A/B Testing</title>
-</head>
-
-<body>
-    <h1>A/B Testing Sample</h1>
-    <ul>
-        <li><a href="/by-cookie">Route Requests by a Cookie</a> - The first request to this sample will set a cookie. For all subsequent requests hitting that sample - within the next hour - will be routed differently</li>
-    </ul>
-</body>
-
-</html>
-"#;
-    Ok(ResponseBuilder::new(200)
+fn send_index() -> Response<FullBody<Bytes>> {
+    let index = include_str!("index.html");
+    Response::builder()
+        .status(200)
         .header("content-type", "text/html")
-        .body(INDEX_PAGE)
-        .build())
+        .body(FullBody::new(Bytes::from(index)))
+        .unwrap()
+}
+async fn send_a_or_b(req: &Request) -> Response<FullBody<Bytes>> {
+    let origin_url = match has_routing_cookie(req) {
+        true => build_request_url(req, ORIGIN_B),
+        false => build_request_url(req, ORIGIN_A),
+    };
+    let origin_req = Request::builder()
+        .method(Method::GET)
+        .uri(origin_url)
+        .body(EmptyBody::new())
+        .unwrap();
+    let origin_response: Response = send(origin_req).await.unwrap();
+
+    let response_bytes = origin_response.into_body().bytes().await.unwrap();
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("content-type", "text/html")
+        .header(
+            "set-cookie",
+            format!("{ROUTING_COOKIE_NAME}=yes;Path=/;SameSite=Lax;Max-Age=3600"),
+        )
+        .body(FullBody::new(response_bytes))
+        .unwrap()
 }
 
-fn has_desired_cookie(req: &Request) -> bool {
-    match req.header("cookie") {
-        Some(header) => match header.as_str() {
-            Some(header_value) => header_value.contains("fwf-ab-testing-cookie=yes"),
-            None => false,
+fn has_routing_cookie(req: &Request) -> bool {
+    match req.headers().get("cookie") {
+        Some(header) => match header.to_str() {
+            Ok(header_value) => {
+                let expected = format!("{ROUTING_COOKIE_NAME}=yes");
+                header_value.contains(&expected)
+            }
+            Err(_) => false,
         },
         None => false,
     }
 }
-async fn route_by_cookie(req: Request, _: Params) -> Result<impl IntoResponse> {
-    const ORIGIN_REQUEST_PATH: &str = "by-cookie.html";
-    let mut origin_route = build_request_url(ORIGIN_A, ORIGIN_REQUEST_PATH);
-    if has_desired_cookie(&req) {
-        origin_route = build_request_url(ORIGIN_B, ORIGIN_REQUEST_PATH);
-    }
-
-    let origin_req = RequestBuilder::new(Method::Get, origin_route).build();
-    let origin_response: Response = send(origin_req).await?;
-
-    Ok(ResponseBuilder::new(200)
-        .header("content-type", "text/html")
-        .header(
-            "set-cookie",
-            "fwf-ab-testing-cookie=yes;Path=/;SameSite=Lax;Max-Age=3600",
-        )
-        .body(origin_response.body().to_vec())
-        .build())
-}
-
-fn build_request_url(origin: &str, path: &str) -> String {
-    format!("/{}/{}", origin, path)
+fn build_request_url(incoming_req: &Request, outgoing_simulated_origin: &str) -> String {
+    format!(
+        "{}://self.alt/{outgoing_simulated_origin}/{ORIGIN_REQUEST_PATH}",
+        incoming_req.uri().scheme_str().unwrap_or("https"),
+    )
 }

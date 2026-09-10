@@ -3,17 +3,18 @@ name = "image-conversion"
 authors = ["Karthik Ganeshram <kganeshr@akamai.com>"]
 description = ""
 version = "0.1.0"
-rust-version = "1.78"
-edition = "2021"
+rust-version = "1.93"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = "1"
+bytes = "1.12.1"
 image = "0.25.9"
 image-webp = { git = "https://github.com/image-rs/image-webp", rev = "a09c415245361f66bd595a899069970417c607a1" }
-spin-sdk = "5.0.0"
+spin-sdk = "7.0.0"
 url = "2.5"
 serde_json = "1.0"
 

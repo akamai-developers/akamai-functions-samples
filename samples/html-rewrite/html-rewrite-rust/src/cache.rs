@@ -17,16 +17,17 @@ impl CacheItem {
                 .as_secs()
     }
 
-    pub(crate) fn load_by_key(kv: &Store, key: &str) -> anyhow::Result<Option<Self>> {
-        kv.get_json::<Self>(key)
+    pub(crate) async fn load_by_key(kv: &Store, key: &str) -> anyhow::Result<Option<Self>> {
+        kv.get_json::<Self>(key).await
     }
 
-    pub(crate) fn store_at_key(&self, kv: &Store, key: &str) -> anyhow::Result<()> {
-        kv.set_json(key, self)
+    pub(crate) async fn store_at_key(&self, kv: &Store, key: &str) -> anyhow::Result<()> {
+        kv.set_json(key, self).await
     }
 
-    pub(crate) fn delete_by_key(kv: &Store, key: &str) -> anyhow::Result<()> {
+    pub(crate) async fn delete_by_key(kv: &Store, key: &str) -> anyhow::Result<()> {
         kv.delete(key)
+            .await
             .context("Error while deleting CacheItem from kv store")
     }
 

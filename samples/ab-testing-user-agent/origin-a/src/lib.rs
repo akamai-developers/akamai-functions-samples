@@ -1,17 +1,29 @@
-use anyhow::Result;
-use spin_sdk::http::{IntoResponse, Params, Request, ResponseBuilder, Router};
-use spin_sdk::http_component;
+use bytes::Bytes;
+use spin_sdk::http::{FullBody, IntoResponse, Method, Request, Response, StatusCode};
+use spin_sdk::http_service;
 
-#[http_component]
-fn handle_origin_a(req: Request) -> anyhow::Result<impl IntoResponse> {
-    let mut router = Router::default();
-    router.get("/origin-a/by-user-agent.html", get_user_agent_response);
-    Ok(router.handle(req))
+#[http_service]
+async fn handle_origin_a(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() != Method::GET {
+        return Ok(Response::builder()
+            .status(StatusCode::METHOD_NOT_ALLOWED)
+            .body(FullBody::default())
+            .unwrap());
+    }
+    Ok(match req.uri().path().to_lowercase().as_str() {
+        "/origin-a/by-user-agent.html" => send_page(),
+        _ => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(FullBody::default())
+            .unwrap(),
+    })
 }
 
-fn get_user_agent_response(_req: Request, _: Params) -> Result<impl IntoResponse> {
-    Ok(ResponseBuilder::new(200)
+fn send_page() -> Response<FullBody<Bytes>> {
+    let page = include_str!("by-user-agent.html");
+    Response::builder()
+        .status(StatusCode::OK)
         .header("content-type", "text/html")
-        .body("<html><head><title>Variant A</title></head><body><h1>Variant A</h1><h2>Variant A is presented because of your user agent</h2></body></html>")
-        .build())
+        .body(FullBody::new(Bytes::from(page)))
+        .unwrap()
 }

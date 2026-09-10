@@ -15,20 +15,20 @@ route = "/origin/..."
 component = "origin"
 
 [component.autocomplete]
-source = "autocomplete/target/wasm32-wasip1/release/autocomplete.wasm"
-allowed_outbound_hosts = ["http://self", "https://self"]
+source = "autocomplete/target/wasm32-wasip2/release/autocomplete.wasm"
+allowed_outbound_hosts = ["http://self.alt", "https://self.alt"]
 
 [component.autocomplete.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 workdir = "autocomplete"
 watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.origin]
-source = "origin/target/wasm32-wasip1/release/origin.wasm"
+source = "origin/target/wasm32-wasip2/release/origin.wasm"
 allowed_outbound_hosts = []
 key_value_stores = ["default"]
 
 [component.origin.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build --target wasm32-wasip2 --release"
 workdir = "origin"
 watch = ["src/**/*.rs", "Cargo.toml"]

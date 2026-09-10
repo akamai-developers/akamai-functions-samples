@@ -1,7 +1,9 @@
 use anyhow::*;
+use bytes::Bytes;
 use graphql_client::GraphQLQuery;
-use spin_sdk::http::{send, IntoResponse, Request, Response, ResponseBuilder};
-use spin_sdk::http_component;
+use spin_sdk::http::body::IncomingBodyExt;
+use spin_sdk::http::{FullBody, IntoResponse, Method, Request, Response, StatusCode, send};
+use spin_sdk::http_service;
 
 #[allow(clippy::upper_case_acronyms)]
 type URI = String;
@@ -15,12 +17,33 @@ type URI = String;
 struct RepoView;
 
 /// A simple Spin HTTP component.
-#[http_component]
+#[http_service]
 async fn handle_graphql(req: Request) -> Result<impl IntoResponse> {
-    let github_api_token =
-        spin_sdk::variables::get("gh_api_token").expect("Missing gh_api_token variable");
+    let path = req.uri().path();
 
-    let (owner, name) = parse_repo_name(req.path())?;
+    // Serve the landing page with the owner/repo lookup form.
+    if path == "/" || path == "/index.html" {
+        return Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header("content-type", "text/html")
+            .body(FullBody::new(Bytes::from(include_str!("index.html"))))
+            .unwrap());
+    }
+
+    // Anything that isn't a "/stargazers/owner/repo" path (including browser
+    // requests like GET /favicon.ico) is sent back to the landing page.
+    let Some((owner, name)) = parse_repo_name(path).ok() else {
+        return Ok(Response::builder()
+            .status(StatusCode::FOUND)
+            .header("location", "/")
+            .body(FullBody::default())
+            .unwrap());
+    };
+
+    let github_api_token = spin_sdk::variables::get("gh_api_token")
+        .await
+        .expect("Missing gh_api_token variable");
+
     let variables = repo_view::Variables {
         owner: owner.to_string(),
         name: name.to_string(),
@@ -29,60 +52,58 @@ async fn handle_graphql(req: Request) -> Result<impl IntoResponse> {
     let body = RepoView::build_query(variables);
     let body = serde_json::to_string(&body).unwrap();
 
-    let outgoing = Request::post("https://api.github.com/graphql", body)
+    let outgoing = Request::builder()
+        .method(Method::POST)
+        .uri("https://api.github.com/graphql")
         .header("user-agent", "graphql-rust")
         .header("content-type", "application/json")
         .header("Authorization", format!("Bearer {}", github_api_token))
-        .build();
+        .body(FullBody::new(Bytes::from(body)))
+        .unwrap();
     let res: Response = send(outgoing).await?;
 
+    let res_bytes = res.into_body().bytes().await?;
     let response: graphql_client::Response<repo_view::ResponseData> =
-        serde_json::from_slice(res.body()).unwrap();
+        serde_json::from_slice(&res_bytes).unwrap();
     let response_data = response.data.expect("missing response data");
 
     let stars = response_data
         .repository
         .as_ref()
-        .map(|repo| repo.stargazers.total_count);
+        .map(|repo| repo.stargazer_count);
     match stars {
-        Some(stars) => {
-            let resp = ResponseBuilder::new(200)
-                .body(render_stargazers(stars, owner, name))
-                .header("content-type", "text/html")
-                .build();
-            Ok(resp)
-        }
-        None => {
-            let resp = ResponseBuilder::new(404)
-                .body(format!("Repository {}/{} not found", owner, name))
-                .header("content-type", "text/plain")
-                .build();
-            Ok(resp)
-        }
+        Some(stars) => Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header("content-type", "text/html")
+            .body(FullBody::new(Bytes::from(render_stargazers(
+                stars, owner, name,
+            ))))
+            .unwrap()),
+        None => Ok(Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .header("content-type", "text/plain")
+            .body(FullBody::new(Bytes::from(format!(
+                "Repository {}/{} not found",
+                owner, name
+            ))))
+            .unwrap()),
     }
 }
 
-fn parse_repo_name(repo_name: &str) -> Result<(&str, &str), anyhow::Error> {
-    let mut parts = repo_name.split('/').skip(1);
-    match (parts.next(), parts.next()) {
-        (Some(owner), Some(name)) => Ok((owner, name)),
-        _ => Err(format_err!("wrong format for the repository name param (we expect something like spinframework/spin)"))
+fn parse_repo_name(path: &str) -> Result<(&str, &str), anyhow::Error> {
+    let mut parts = path.split('/').filter(|s| !s.is_empty());
+    match (parts.next(), parts.next(), parts.next()) {
+        (Some("stargazers"), Some(owner), Some(name)) => Ok((owner, name)),
+        _ => Err(format_err!(
+            "wrong format for the repository path (we expect something like /stargazers/spinframework/spin)"
+        )),
     }
 }
 
 fn render_stargazers(stars: i64, org: &str, repo: &str) -> String {
-    format!(
-        r#"<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Stargazers for {org}/{repo}</title>
-  </head>
-  <body>
-    <h1>Stargazers for {org}/{repo}</h1>
-    <p>This repository has 🌟{stars}🌟 stars.</p>
-  </body>
-</html>
-"#
-    )
+    include_str!("stargazers.html")
+        .replace("__STARS__", &stars.to_string())
+        .replace("__ORG__", org)
+        .replace("__REPO__", repo)
 }
+

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Variant B &middot; Akamai Functions</title>
+  <title>Variant A &middot; Akamai Functions</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -12,8 +12,8 @@
       --border: #26304d;
       --text: #e7ebf5;
       --muted: #9aa5c0;
-      --accent: #a855f7;
-      --accent-hover: #9333ea;
+      --accent: #14b8a6;
+      --accent-hover: #0f9488;
     }
 
     * { box-sizing: border-box; }
@@ -27,7 +27,7 @@
       padding: 200px 1.5rem 1.5rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 1.0625rem;
-      background: radial-gradient(1200px 600px at 50% -10%, #331b52 0%, var(--bg) 60%), var(--bg);
+      background: radial-gradient(1200px 600px at 50% -10%, #0e3b34 0%, var(--bg) 60%), var(--bg);
       color: var(--text);
     }
 
@@ -48,9 +48,9 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #d3adff;
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: var(--accent);
+      background: rgba(20, 184, 166, 0.12);
+      border: 1px solid rgba(20, 184, 166, 0.3);
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
     }
@@ -90,7 +90,7 @@
       margin-top: 1rem;
       padding: 0.85rem 1.5rem;
       background: var(--accent);
-      color: #1e0b33;
+      color: #06231f;
       text-decoration: none;
       font-weight: 700;
       font-size: 1rem;
@@ -124,16 +124,17 @@
 
 <body>
   <main class="card">
-    <span class="badge">Origin B</span>
-    <div class="variant">Variant B</div>
-    <h1>You are seeing the experiment experience</h1>
+    <span class="badge">Origin A</span>
+    <div class="variant">Variant A</div>
+    <h1>You are seeing the control experience</h1>
     <p>
-      This request was routed to <code>origin-b</code> because the request
-      <code>counter</code> in the key-value store landed on an <strong>even</strong> value.
+      This request was routed to <code>origin-a</code> because the
+      <code>akamai-functions-routing-cookie</code> was <strong>not</strong> present yet.
+      The traffic router has now set that cookie on the response.
     </p>
     <p>
-      Reload to increment the counter to an odd value and your next visit
-      will land on <strong>Variant A</strong> again.
+      Reload or come back within the next hour and you will be routed to
+      <strong>Variant B</strong> instead.
     </p>
 
     <a class="btn" href="/index.html">
