@@ -38,6 +38,7 @@ await build({
   loader: {
     '.ts': 'ts',
     '.tsx': 'tsx',
+    '.html': 'text'
   },
   resolveExtensions: ['.ts', '.tsx', '.js'],
   sourceRoot: path.resolve(process.cwd(), 'src'),

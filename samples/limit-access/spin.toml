@@ -7,7 +7,7 @@ name = "limit-access"
 version = "0.1.0"
 
 [variables]
-origin = { required = true }
+origin = { default = "https://developers.akamai.com" }
 block_until = { required = true }
 block_status_code = { default = "404" }
 block_location = { default = "" }
