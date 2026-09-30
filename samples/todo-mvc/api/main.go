@@ -6,18 +6,18 @@ import (
 	"net/http"
 
 	"github.com/api/internal/repository"
-	spinhttp "github.com/fermyon/spin/sdk/go/v2/http"
+	spinhttp "github.com/spinframework/spin-go-sdk/v3/http"
 )
 
 func init() {
+	router := http.NewServeMux()
+	router.HandleFunc("GET /api/todos", getAllTodos)
+	router.HandleFunc("POST /api/todos", addNewTodo)
+	router.HandleFunc("DELETE /api/todos/{id}", deleteTodoById)
+	router.HandleFunc("PUT /api/todos/{id}", updateTodoById)
+	router.HandleFunc("POST /api/todos/{id}", toggleTodoById)
+	router.HandleFunc("DELETE /api/todos", deleteCompletedTodos)
 	spinhttp.Handle(func(w http.ResponseWriter, r *http.Request) {
-		router := spinhttp.NewRouter()
-		router.GET("/api/todos", getAllTodos)
-		router.POST("/api/todos", addNewTodo)
-		router.DELETE("/api/todos/:id", deleteTodoById)
-		router.PUT("/api/todos/:id", updateTodoById)
-		router.POST("/api/todos/:id", toggleTodoById)
-		router.DELETE("/api/todos", deleteCompletedTodos)
 		router.ServeHTTP(w, r)
 	})
 }
@@ -26,7 +26,7 @@ type CreateAndUpdateModel struct {
 	Content string `json:"content"`
 }
 
-func getAllTodos(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
+func getAllTodos(w http.ResponseWriter, r *http.Request) {
 	todos, err := repository.GetAllTodos()
 	if err != nil {
 		fmt.Printf("GET /api/todos: %v", err)
@@ -42,7 +42,7 @@ func getAllTodos(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
 	}
 }
 
-func addNewTodo(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
+func addNewTodo(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	var payload CreateAndUpdateModel
 	err := dec.Decode(&payload)
@@ -67,8 +67,8 @@ func addNewTodo(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
 
 }
 
-func deleteTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
-	id := p.ByName("id")
+func deleteTodoById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
 	deleted, err := repository.DeleteTodoById(id)
 	if err != nil {
 		fmt.Printf("DELETE /api/todos/%s: %v", id, err)
@@ -83,8 +83,8 @@ func deleteTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
 	w.WriteHeader(204)
 }
 
-func updateTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
-	id := p.ByName("id")
+func updateTodoById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
 	dec := json.NewDecoder(r.Body)
 	var payload CreateAndUpdateModel
 	err := dec.Decode(&payload)
@@ -114,8 +114,8 @@ func updateTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
 	}
 }
 
-func toggleTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
-	id := p.ByName("id")
+func toggleTodoById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
 
 	toggled, err := repository.ToggleTodoById(id)
 	if err != nil {
@@ -139,7 +139,7 @@ func toggleTodoById(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
 
 }
 
-func deleteCompletedTodos(w http.ResponseWriter, r *http.Request, p spinhttp.Params) {
+func deleteCompletedTodos(w http.ResponseWriter, r *http.Request) {
 	todos, err := repository.DeleteAllCompletedTodos()
 	if err != nil {
 		fmt.Printf("DELETE /api/todos/completed: %v", err)
@@ -154,3 +154,5 @@ func deleteCompletedTodos(w http.ResponseWriter, r *http.Request, p spinhttp.Par
 		return
 	}
 }
+
+func main() {}

@@ -20,9 +20,8 @@ files = [{ source = "frontend/dist", destination = "/" }]
 environment = { FALLBACK_PATH = "index.html" }
 
 [component.frontend.build]
-command = "npm install && npm run build"
+command = ["npm install", "npm run build"]
 workdir = "frontend"
-
 
 [component.api]
 source = "api/main.wasm"
@@ -30,6 +29,6 @@ allowed_outbound_hosts = []
 key_value_stores = ["default"]
 
 [component.api.build]
-command = "tinygo build -target=wasip1 -gc=leaking -buildmode=c-shared -no-debug -o main.wasm ."
+command = "go tool componentize-go build"
 workdir = "api"
 watch = ["**/*.go", "go.mod"]

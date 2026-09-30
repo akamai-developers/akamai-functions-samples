@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/fermyon/spin/sdk/go/v2/kv"
 	"github.com/google/uuid"
+	"github.com/spinframework/spin-go-sdk/v3/kv"
 )
 
 type Todo struct {
@@ -115,7 +115,7 @@ func ToggleTodoById(id string) (*Todo, error) {
 
 func loadTodos() ([]Todo, error) {
 	todos := make([]Todo, 0)
-	store, err := kv.OpenStore("default")
+	store, err := kv.Open("default")
 	if err != nil {
 		return todos, err
 	}
@@ -138,7 +138,7 @@ func loadTodos() ([]Todo, error) {
 }
 
 func saveTodos(todos []Todo) error {
-	store, err := kv.OpenStore("default")
+	store, err := kv.Open("default")
 	if err != nil {
 		return err
 	}
