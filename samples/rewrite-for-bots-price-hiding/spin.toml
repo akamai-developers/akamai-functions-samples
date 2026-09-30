@@ -14,22 +14,26 @@ replacements_json = { required = true }
 
 [[trigger.http]]
 route = "/..."
-component = "rewrite-for-bots-price-hiding"
-
-[component.rewrite-for-bots-price-hiding]
-source = "target/wasm32-wasip2/release/rewrite_for_bots_price_hiding.wasm"
-allowed_outbound_hosts = ["{{ upstream_host }}"]
-[component.rewrite-for-bots-price-hiding.variables]
-upstream_host = "{{ upstream_host }}"
-error_response = "{{ error_response }}"
-replacements_json = "{{ replacements_json }}"
-[component.rewrite-for-bots-price-hiding.build]
-command = "cargo build --target wasm32-wasip2 --release"
-watch = ["src/**/*.rs", "Cargo.toml"]
+component = "middleware"
 
 [[trigger.http]]
 route = "/backend/..."
 component = "shirt-shop"
+
+
+[component.middleware]
+source = "middleware/target/wasm32-wasip2/release/middleware.wasm"
+allowed_outbound_hosts = ["{{ upstream_host }}"]
+
+[component.middleware.variables]
+upstream_host = "{{ upstream_host }}"
+error_response = "{{ error_response }}"
+replacements_json = "{{ replacements_json }}"
+
+[component.middleware.build]
+command = "cargo build --target wasm32-wasip2 --release"
+workdir = "middleware"
+watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.shirt-shop]
 source = { url = "https://github.com/spinframework/spin-fileserver/releases/download/v0.3.0/spin_static_fs.wasm", digest = "sha256:ef88708817e107bf49985c7cefe4dd1f199bf26f6727819183d5c996baa3d148" }
