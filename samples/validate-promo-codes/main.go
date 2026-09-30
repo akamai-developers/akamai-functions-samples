@@ -4,23 +4,23 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/fermyon/fwf-samples/validate-promo-codes/pkg/promo"
-	spinhttp "github.com/fermyon/spin/sdk/go/v2/http"
+	"github.com/akamai-developers/akamai-functions-samples/samples/validate-promo-codes/pkg/promo"
+	spinhttp "github.com/spinframework/spin-go-sdk/v3/http"
 )
 
 func init() {
-	router := spinhttp.NewRouter()
+	router := http.NewServeMux()
 
-	router.POST("/apply/:code", applyPromocode)
-	router.POST("/validate/:code", validatePromoCode)
-	router.POST("/seed-promocodes", seedPromoCodes)
+	router.HandleFunc("POST /apply/{code}", applyPromocode)
+	router.HandleFunc("POST /validate/{code}", validatePromoCode)
+	router.HandleFunc("POST /seed-promocodes", seedPromoCodes)
 	spinhttp.Handle(func(w http.ResponseWriter, r *http.Request) {
 		router.ServeHTTP(w, r)
 	})
 }
 
-func applyPromocode(w http.ResponseWriter, r *http.Request, params spinhttp.Params) {
-	input := params.ByName("code")
+func applyPromocode(w http.ResponseWriter, r *http.Request) {
+	input := r.PathValue("code")
 	if len(input) == 0 {
 		http.Error(w, "Bad Request", 400)
 		return
@@ -47,8 +47,9 @@ func applyPromocode(w http.ResponseWriter, r *http.Request, params spinhttp.Para
 	encoder.SetIndent("", "  ")
 	encoder.Encode(res)
 }
-func validatePromoCode(w http.ResponseWriter, r *http.Request, params spinhttp.Params) {
-	input := params.ByName("code")
+
+func validatePromoCode(w http.ResponseWriter, r *http.Request) {
+	input := r.PathValue("code")
 	if len(input) == 0 {
 		http.Error(w, "Bad Request", 400)
 		return
@@ -76,7 +77,7 @@ func validatePromoCode(w http.ResponseWriter, r *http.Request, params spinhttp.P
 	encoder.Encode(res)
 }
 
-func seedPromoCodes(w http.ResponseWriter, r *http.Request, params spinhttp.Params) {
+func seedPromoCodes(w http.ResponseWriter, r *http.Request) {
 	codes := promo.GenerateSamplePromoCodes()
 	promo.StoreCodes(codes)
 	w.WriteHeader(201)

@@ -16,5 +16,5 @@ allowed_outbound_hosts = []
 key_value_stores = ["default"]
 
 [component.validate-promo-codes.build]
-command = "tinygo build -target=wasip1 -scheduler=none -buildmode=c-shared -no-debug -o main.wasm main.go"
+command = "go tool componentize-go build"
 watch = ["**/*.go", "go.mod"]

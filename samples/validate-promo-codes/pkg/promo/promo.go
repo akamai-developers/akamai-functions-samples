@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fermyon/spin/sdk/go/v2/kv"
 	"github.com/google/uuid"
+	"github.com/spinframework/spin-go-sdk/v3/kv"
 )
 
 type PromoCode struct {
@@ -54,11 +54,10 @@ func Apply(input string) (*ApplyResult, error) {
 			Discount: 0,
 		}, nil
 	}
-	store, err := kv.OpenStore("default")
+	store, err := kv.Open("default")
 	if err != nil {
 		return nil, err
 	}
-	defer store.Close()
 	data, err := store.Get(strings.ToLower(input))
 	if err != nil {
 		return nil, err
@@ -86,11 +85,10 @@ func Apply(input string) (*ApplyResult, error) {
 }
 
 func Validate(input string) (*ValidationResult, error) {
-	store, err := kv.OpenStore("default")
+	store, err := kv.Open("default")
 	if err != nil {
 		return nil, err
 	}
-	defer store.Close()
 	exists, err := store.Exists(strings.ToLower(input))
 	if err != nil {
 		return nil, err
@@ -149,11 +147,10 @@ func GenerateSamplePromoCodes() []PromoCode {
 }
 
 func StoreCodes(codes []PromoCode) error {
-	store, err := kv.OpenStore("default")
+	store, err := kv.Open("default")
 	if err != nil {
 		return err
 	}
-	defer store.Close()
 
 	for _, item := range codes {
 		code, err := json.Marshal(item)
