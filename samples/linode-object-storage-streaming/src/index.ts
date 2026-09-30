@@ -60,9 +60,6 @@ router.get('/stream/:bucket/:file', async ({ bucket, file }) => {
         status: 200,
         headers,
     });
-
-
-
 })
     .get("/largetxt", async () => {
         const res = await fetch("https://raw.githubusercontent.com/dscape/spell/refs/heads/master/test/resources/big.txt");
