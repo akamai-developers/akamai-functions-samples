@@ -2,6 +2,37 @@
 
 This folder contains the sample application written as part of the _Querying MySQL_ tutorial.
 
+## Test locally with MySQL in Docker
+
+Run MySQL in Docker:
+
+```bash
+docker run -d \
+  --name mysql-container \
+  -e MYSQL_USER=bob \
+  -e MYSQL_PASSWORD=secret \
+  -e MYSQL_DATABASE=sample \
+  -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
+  -p 3306:3306 \
+  mysql:latest
+```
+
+use `docker exec` to run the SQL scripts below against the database:
+
+```bash
+docker exec -i mysql-container mysql -ubob -psecret sample < seed.sql
+```
+
+Run the Spin application and pass required variables:
+
+```bash
+spin up --build \
+  --variable mysql_host=localhost \
+  --variable mysql_user=bob \
+  --variable mysql_password=secret \
+  --variable mysql_database=sample
+```
+
 ## SQL Scripts
 
 To provision the necessary `Products` table, use the following SQL command:

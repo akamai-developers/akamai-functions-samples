@@ -4,7 +4,6 @@ import * as Mysql from '@spinframework/spin-mysql';
 import { v4 as uuidv4 } from 'uuid';
 import { validate as uuidValidate } from 'uuid';
 
-const router = AutoRouter();
 const decoder = new TextDecoder();
 
 // define application constants
@@ -13,9 +12,12 @@ const SQL_READ_ALL = "SELECT Id, Name, Price from Products ORDER BY Name";
 const SQL_READ_BY_ID = "SELECT Id, Name, Price from Products WHERE Id = ?";
 const SQL_UPDATE_BY_ID = "UPDATE Products SET Name = ?, Price = ? WHERE Id = ?";
 const SQL_DELETE_BY_ID = "DELETE FROM Products WHERE Id = ?";
+
 const DEFAULT_HEADERS = {
   "content-type": "application/json"
 };
+
+const router = AutoRouter();
 
 // helper function to quickly respond with an HTTP 400
 function badRequest(message: string) {
@@ -28,7 +30,6 @@ function notFound(message: string) {
 }
 
 // Layout the HTTP API
-
 router
   // C(reate) -> Add a new product
   .post("/products", async (request, { connectionString }) => createProduct(await request.arrayBuffer(), connectionString))
@@ -52,7 +53,6 @@ addEventListener('fetch', async (event: FetchEvent) => {
       { status: 500, headers: DEFAULT_HEADERS }
     ));
   }
-
   // Let the HTTP router handle incoming requests
   // pass the connection string as extra
   event.respondWith(router.fetch(event.request, { connectionString }));

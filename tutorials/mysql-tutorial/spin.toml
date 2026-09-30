@@ -10,7 +10,7 @@ version = "0.1.0"
 mysql_host = { required = true }
 mysql_user = { required = true }
 mysql_password = { required = true, secret = true }
-mysql_port = { required = true }
+mysql_port = { default = "3306" }
 mysql_database = { required = true }
 
 [[trigger.http]]
