@@ -59,7 +59,7 @@ Results are cached in the key-value store, so repeating a phrase returns the
 cached sentiment without another inference call. You can inspect the cache via
 the Key-Value Explorer at `/internal/kv-explorer/`.
 
-## Deploying to Fermyon Wasm Functions
+## Deploying to Akamai Functions
 
 Once authenticated (`spin aka login`), you can deploy the application using the `spin aka deploy` command. Required variables must be specified using the `--variable` flag:
 

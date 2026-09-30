@@ -1,10 +1,10 @@
 # Tutorial: Using the Key Value Store
 
-This folder contains the sample application written as part of the [Using the Key Value Store](https://wasm-functions.fermyon.app/fermyon-wasm-functions/using-key-value-store) tutorial.
+This folder contains the sample application written as part of the [Use the Key Value Store](https://techdocs.akamai.com/akamai-functions/docs/use-the-key-value-store) tutorial.
 
 ## Prerequisites
 
-You need the following tools on your machine, to build, run and deploy the application to _Fermyon Wasm Functions_:
+You need the following tools on your machine, to build, run and deploy the application to _Akamai Functions_:
 
 - The `spin` CLI
 - Node.js (Version `24` or later)

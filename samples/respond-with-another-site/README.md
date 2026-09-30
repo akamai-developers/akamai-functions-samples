@@ -1,6 +1,6 @@
 # Respond with another site
 
-This sample shows a Fermyon Wasm Function that responds to a request with the response from another site (in this case a 'random animal facts' sample).
+This sample shows an Akamai Function that responds to a request with the response from another site (in this case a 'random animal facts' sample).
 
 The app is fronted by a small landing page:
 

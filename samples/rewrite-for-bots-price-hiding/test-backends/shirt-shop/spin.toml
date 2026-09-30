@@ -3,7 +3,7 @@ spin_manifest_version = 2
 [application]
 name = "shirt-shop"
 version = "0.1.0"
-authors = ["Fermyon"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 description = "A sample backend for testing/demoing the rewriter"
 
 [[trigger.http]]

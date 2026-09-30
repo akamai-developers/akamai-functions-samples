@@ -5,15 +5,15 @@ This repository contains various samples for applications that one could run on 
 ## Tutorials
 
 - [Key Value Store](./tutorials/key-value-store-tutorial/)
-  - This folder contains the sample application written as part of the [Using the Key Value Store](https://developer.fermyon.com/wasm-functions/using-key-value-store) tutorial.
+  - This folder contains the sample application written as part of the [Using the Key Value Store](https://techdocs.akamai.com/akamai-functions/docs/use-the-key-value-store) tutorial.
 - [Querying PostgreSQL](./tutorials/postgresql-tutorial/)
-  - This folder contains the sample application written as part of the [Querying PostgreSQL tutorial](https://developer.fermyon.com/wasm-functions/querying-postgresql).
+  - This folder contains the sample application written as part of the [Querying PostgreSQL tutorial](https://techdocs.akamai.com/akamai-functions/docs/query-relational-databases-postgresql).
 - [Querying MySQL](./tutorials/mysql-tutorial/)
-  - This folder contains the sample application written as part of the [Querying MySQL tutorial](https://developer.fermyon.com/wasm-functions/querying-linode-mysql).
+  - This folder contains the sample application written as part of the [Querying MySQL tutorial](https://techdocs.akamai.com/akamai-functions/docs/query-relational-databases-mysql).
 - [Stream Data from Linode Object Store](./tutorials/stream-data-from-linode-object-store-tutorial/)
-  - This folder contains the sample application written as part of the [Stream Data from Linode Object Store tutorial](https://developer.fermyon.com/wasm-functions/stream-data-from-linode-object-store)
+  - This folder contains the sample application written as part of the [Stream Data from Linode Object Store tutorial](https://techdocs.akamai.com/akamai-functions/docs/stream-data-from-linode-object-store)
 - [Supabase Cache Proxy](./tutorials/supabase-proxy-tutorial/)
-  - This folder contains the sample application written as part of the [Build a Cache Proxy For Supabase tutorial](https://developer.fermyon.com/wasm-functions/supabase-cache-proxy)
+  - This folder contains the sample application written as part of the [Build a Cache Proxy For Supabase tutorial](https://techdocs.akamai.com/akamai-functions/docs/build-a-supabase-cache-proxy)
 
 ## Examples
 
@@ -25,8 +25,6 @@ This repository contains various samples for applications that one could run on 
   - This folder contains a Spin application that demonstrates how to implement A/B testing based on the user agent.
 - [Aggregate JSON](./samples/aggregate-json/)
   - This sample shows how to make concurrent outgoing HTTP requests and combine the results.
-- [AI Sentiment Analysis](./samples/ai-sentiment-analysis/)
-  - This repository contains an API that performs sentiment analysis and a simple UI to interact with it.
 - [AI Sentiment Analysis (Ollama Edition)](./samples/ai-sentiment-analysis-ollama/)
   - This sample illustrates how to build an AI Sentiment Analysis API using a configurable Large Language Model (LLM) hosted on Ollama.
 - [Alter Response Headers](./samples/alter-headers/)
@@ -58,7 +56,7 @@ This repository contains various samples for applications that one could run on 
 - [Reading the Body of a POST Request](./samples/read-post/)
   - This sample illustrates how to read the body of an HTTP POST request.
 - [Respond with Another Site](./samples/respond-with-another-site/)
-  - This sample shows a Fermyon Wasm Function that responds to all `GET` requests with the response from another site (in this case a 'random animal facts' sample).
+  - This sample shows an Akamai Function that responds to all `GET` requests with the response from another site (in this case a 'random animal facts' sample).
 - [Response Header Modification](./samples/response-header-modification/)
   - This folder contains a Spin app, that is allowed to make outbound HTTP requests to the [Star Wars API](https://swapi.dev). Upon calling the origin (Star Wars API), the `accept` header from the incoming request is used (if not specified it's defaulting to `*/*`).
 - [Rewrite for bots](./samples/rewrite-for-bots-price-hiding/)

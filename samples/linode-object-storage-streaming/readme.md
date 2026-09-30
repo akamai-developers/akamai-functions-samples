@@ -16,7 +16,7 @@ spin build
 spin up
 ```
 
-Deploying to Fermyon Wasm Functions:
+Deploying to Akamai Functions:
 
 ```
 spin aka deploy --variable access_key_id=$SPIN_VARIABLE_ACCESS_KEY_ID --variable secret_access_key=$SPIN_VARIABLE_SECRET_ACCESS_KEY
@@ -28,4 +28,3 @@ To make requests:
 ```
 curl <your-app-endpoint>/stream/<bucket-name>/<file> --no-buffer
 ```
-

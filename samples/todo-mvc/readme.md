@@ -16,6 +16,6 @@ The application is built using the `spin build` command. As the `frontend` is im
 To run the application locally, execute the `spin up` command.
 
 
-## Deploying to Fermyon Wasm Functions
+## Deploying to Akamai Functions
 
-Once authenticated with `spin aka login`, the application can be deployed to Fermyon Wasm Functions using the `spin aka deploy` command.
+Once authenticated with `spin aka login`, the application can be deployed to Akamai Functions using the `spin aka deploy` command.

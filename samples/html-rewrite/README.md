@@ -20,7 +20,7 @@ If enabled, the app will cache the original HTML from upstream in key-value stor
 
 The Spin app does rewriting **only** if the upstream server responds with an status code `200` and a `content-type` header containing `text/html`. Different upstream responses will be forwarded as-is to the callee. 
 
-Both sample implementations will replace contents of all `h1` tags in the HTML with `Hello Bot Protection this is Fermyon Wasm Functions`
+Both sample implementations will replace contents of all `h1` tags in the HTML with `Hello Bot Protection this is Akamai Functions`
 
 ## Running the Apps locally
 

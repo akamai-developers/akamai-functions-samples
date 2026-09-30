@@ -1,7 +1,7 @@
 spin_manifest_version = 2
 
 [application]
-authors = ["Thorsten Hans <thorsten.hans@fermyon.com>"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 description = ""
 name = "block-by-ip"
 version = "0.1.0"

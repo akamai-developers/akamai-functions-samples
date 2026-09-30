@@ -1,7 +1,7 @@
 spin_manifest_version = 2
 
 [application]
-authors = ["Thorsten Hans <thorsten.hans@fermyon.com>"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 description = ""
 name = "stream-data-from-linode-object-store-tutorial"
 version = "0.1.0"
@@ -33,4 +33,3 @@ secret_access_key = "{{ secret_access_key }}"
 [component.stream-data-from-linode-object-store-tutorial.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]
-

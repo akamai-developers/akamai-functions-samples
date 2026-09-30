@@ -54,7 +54,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
               FWaFfic
             </Link>
-            
+
             <div className="flex items-center gap-6">
               {user && (
                 <ul className="hidden md:flex items-center space-x-6">
@@ -70,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </li>
                 </ul>
               )}
-              
+
               {!loading && (
                 <div>
                   {user ? (
@@ -98,7 +98,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             </div>
           </div>
-          
+
           {/* Mobile menu for authenticated users */}
           {user && (
             <div className="md:hidden pt-2 pb-1">
@@ -114,7 +114,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           )}
         </nav>
       </header>
-      
+
       <main className="container mx-auto px-4 py-8 flex-1">
         {!user && !loading ? (
           <div className="max-w-6xl mx-auto">
@@ -150,7 +150,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     FWaFfic is a demonstration backend for traffic mirroring, intended as a showcase of what's possible with WebAssembly-powered traffic splitting.
                   </p>
                   <p className="text-blue-700 dark:text-blue-400 mb-3">
-                    In production environments, you can integrate with your existing security, monitoring, or logging systems. Fermyon Wasm Functions can split traffic and send to all of them simultaneously.
+                    In production environments, you can integrate with your existing security, monitoring, or logging systems. Akamai Functions can split traffic and send to all of them simultaneously.
                   </p>
                   <p className="text-blue-700 dark:text-blue-400">
                     This flexibility allows you to leverage your current infrastructure while gaining the benefits of WebAssembly's performance and security.
@@ -162,13 +162,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* Problem Section */}
             <div className="py-16 bg-muted/30 rounded-lg p-8">
               <h2 className="text-3xl font-bold text-center mb-8">The Challenge of Traffic Mirroring</h2>
-              
+
               <div className="prose prose-lg max-w-4xl mx-auto">
                 <p className="text-lg mb-6">
-                  Organizations often need to duplicate (tee) traffic to additional destinations beyond their origin servers. 
+                  Organizations often need to duplicate (tee) traffic to additional destinations beyond their origin servers.
                   This is critical for:
                 </p>
-                
+
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 list-none pl-0">
                   <li className="bg-card p-4 rounded-lg border flex items-start">
                     <div className="bg-primary/10 p-2 rounded-full mr-3 mt-1">
@@ -207,9 +207,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </div>
                   </li>
                 </ul>
-                
+
                 <h3 className="text-xl font-semibold mb-4">What organizations need is a solution that is:</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="bg-background p-5 rounded-lg border">
                     <h4 className="font-semibold text-lg mb-2">Cost-efficient</h4>
@@ -233,12 +233,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Solution Section */}
             <div className="py-16">
-              <h2 className="text-3xl font-bold text-center mb-8">Traffic Mirroring with Fermyon Wasm Functions</h2>
-              
+              <h2 className="text-3xl font-bold text-center mb-8">Traffic Mirroring with Akamai Functions</h2>
+
               <div className="flex flex-col md:flex-row gap-8 items-center mb-12">
                 <div className="md:w-1/2">
                   <p className="text-lg mb-6">
-                    Fermyon Wasm Functions can be configured as the entrypoint for requests to your application, and it can mirror HTTP requests to integrate with your existing systems.
+                    Akamai Functions can be configured as the entrypoint for requests to your application, and it can mirror HTTP requests to integrate with your existing systems.
                   </p>
                   <p className="text-lg mb-6">
                     This powerful approach gives you complete control over your traffic mirroring strategy while maintaining performance and reliability.
@@ -249,7 +249,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center p-4">
                         <p className="text-sm text-muted-foreground mb-2">Diagram: Traffic Mirroring Architecture</p>
-                        <p className="text-xs text-muted-foreground">Client → Fermyon Wasm Functions → Origin</p>
+                        <p className="text-xs text-muted-foreground">Client → Akamai Functions → Origin</p>
                         <p className="text-xs text-muted-foreground">↓</p>
                         <p className="text-xs text-muted-foreground">Data Store</p>
                       </div>
@@ -257,9 +257,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               </div>
-              
-              <h3 className="text-2xl font-semibold text-center mb-6">Benefits of Using Fermyon Wasm Functions</h3>
-              
+
+              <h3 className="text-2xl font-semibold text-center mb-6">Benefits of Using Akamai Functions</h3>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
                   <h4 className="font-semibold text-lg mb-3">Zero Cold Starts</h4>
@@ -300,7 +300,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     Create an account and register your application to get your unique API key.
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col items-center text-center">
                   <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-4">
                     2
@@ -310,7 +310,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     Add our WebAssembly-based service worker to your application with a few lines of code.
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col items-center text-center">
                   <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-4">
                     3
@@ -337,7 +337,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           children
         )}
       </main>
-      
+
       <footer className="border-t py-6 mt-auto">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} FWaFfic. All rights reserved.

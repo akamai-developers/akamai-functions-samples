@@ -1,4 +1,4 @@
-# [FWaFfic](https://5b787b15-5196-4572-8772-abeca0b6e871.aka.fermyon.tech/applications)
+# [FWaFfic](https://5b787b15-5196-4572-8772-abeca0b6e871.fwf.app/applications)
 
 A small traffic monitoring application. Its main goal is to demo [traffic splitting](./trafficsplit/).
 but can also show a real workload.
@@ -32,4 +32,4 @@ spin aka deploy \
 Then, you can send traffic to your Spin application. It will split the traffic: upstream, and to the logging service, then return
 the response from upstream.
 
-You can then see the traffic if you navigate to https://5b787b15-5196-4572-8772-abeca0b6e871.aka.fermyon.tech/applications.
+You can then see the traffic if you navigate to https://5b787b15-5196-4572-8772-abeca0b6e871.fwf.app/applications.

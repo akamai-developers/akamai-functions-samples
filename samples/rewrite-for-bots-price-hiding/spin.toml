@@ -5,7 +5,7 @@ spin_manifest_version = 2
 [application]
 name = "rewrite-for-bots-price-hiding"
 version = "0.1.0"
-authors = ["Fermyon Engineering"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 
 [variables]
 upstream_host = { default = "http://shirt-shop.spin.internal" }

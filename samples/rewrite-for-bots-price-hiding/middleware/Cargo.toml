@@ -1,6 +1,6 @@
 [package]
 name = "middleware"
-authors = ["itowlson <ivan.towlson@fermyon.com>"]
+authors = ["Thorsten Hans <thans@akamai.com>"]
 description = ""
 version = "0.1.0"
 rust-version = "1.93"
