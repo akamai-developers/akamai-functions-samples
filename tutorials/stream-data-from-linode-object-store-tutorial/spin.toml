@@ -12,6 +12,7 @@ endpoint = { required = true }
 bucket_name = { required = true }
 access_key_id = { required = true }
 secret_access_key = { required = true, secret = true }
+protocol = { default = "https" }
 
 [[trigger.http]]
 route = "/..."
@@ -20,11 +21,11 @@ component = "stream-data-from-linode-object-store-tutorial"
 [component.stream-data-from-linode-object-store-tutorial]
 source = "dist/stream-data-from-linode-object-store-tutorial.wasm"
 exclude_files = ["**/node_modules"]
-allowed_outbound_hosts = ['https://{{ bucket_name }}.{{ endpoint }}']
+allowed_outbound_hosts = ['{{ protocol }}://{{ bucket_name }}.{{ endpoint }}']
 
 [component.stream-data-from-linode-object-store-tutorial.variables]
 region = "{{ region }}"
-endpoint = "https://{{ endpoint }}"
+endpoint = "{{ protocol }}://{{ endpoint }}"
 bucket_name = "{{ bucket_name }}"
 access_key_id = "{{ access_key_id }}"
 secret_access_key = "{{ secret_access_key }}"
