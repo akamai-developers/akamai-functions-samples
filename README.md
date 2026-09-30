@@ -47,8 +47,6 @@ This repository contains various samples for applications that one could run on 
   - TypeScript and Rust implementations for a Spin app that does HTML rewriting using CSS selectors.
 - [Image Conversion and Resizing](./samples/image-conversion/)
   - A Rust implementation for a Spin app that enables converting between image formats and resizing the image.
-- [JWT Validator](./samples/jwt-validator/)
-  - This folder contains a Spin application which is able to validate JWT tokens issued by any OAuth 2.0 & OpenID Connect compliant Identity Provider (or Token Issuer).
 - [Large-Scale Redirects](./samples/large-scale-redirects/)
   - A high-performance, large-scale HTTP redirect service implemented as a Spin application.
 - [Limit Access](./samples/limit-access/)
