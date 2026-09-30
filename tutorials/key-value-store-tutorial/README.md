@@ -7,21 +7,30 @@ This folder contains the sample application written as part of the [Using the Ke
 You need the following tools on your machine, to build, run and deploy the application to _Fermyon Wasm Functions_:
 
 - The `spin` CLI
-- Node.js (Version `20` or later)
+- Node.js (Version `24` or later)
 - The `aka` plugin for `spin` CLI
-- Access to _Fermyon Wasm Functions_
+- Access to _Akamai Functions_
 
 
 ## Building the Spin Application
 
 Once you've cloned the repository, move into the tutorial folder ([./tutorials/key-value-store-tutorial](./tutorials/key-value-store-tutorial)), install the dependencies using `npm` and run `spin build`:
 
-```console
+```bash
 cd tutorials/key-value-store-tutorial
-
-npm install
-
 spin build
 ```
+
+## Invoking the endpoints with `curl`
+
+You can set a value using:
+
+```bash
+curl -iX POST -d '{ "firstName" :"John", "lastName": "Doe"}' localhost:3000/set/jd
 ```
+
+and retrieve it again using:
+
+```bash
+curl localhost:3000/get/jd
 ```
