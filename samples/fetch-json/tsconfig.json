@@ -1,21 +1,24 @@
 {
-  "compilerOptions": {
-    "outDir": "./dist/",
-    "noImplicitAny": true,
-    "module": "es6",
-    "target": "es2020",
-    "jsx": "react",
-    "skipLibCheck": true,
-    "lib": [
-      "ES2020",
-      "WebWorker"
-    ],
-    "allowJs": true,
-    "strict": true,
-    "noImplicitReturns": true,
-    "moduleResolution": "node"
-  },
-  "include": [
-    "src/**/*"
-  ]
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "module": "es6",
+        "target": "es2020",
+        "jsx": "react",
+        "skipLibCheck": true,
+        "lib": [
+            "ES2020",
+            "WebWorker"
+        ],
+        "types": [],
+        "allowJs": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "moduleResolution": "bundler"
+    },
+    "include": [
+        "src/**/*",
+        "types/**/*"
+    ]
 }
