@@ -12,6 +12,7 @@ component = "bulk-redirects"
 [component.bulk-redirects]
 source = "dist/bulk-redirects.wasm"
 exclude_files = ["**/node_modules"]
+
 [component.bulk-redirects.build]
 command = ["npm install", "npm run build"]
 watch = ["src/**/*.ts"]
