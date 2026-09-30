@@ -1,12 +1,11 @@
 use std::str::FromStr;
 
-use anyhow::Result;
-use spin_sdk::{
-    http::{Params, Request, Response, Router},
-    http_component,
-    key_value::Store,
-    llm::{infer_with_options, InferencingModel::Llama2Chat},
-};
+use bytes::Bytes;
+use spin_sdk::http::body::IncomingBodyExt;
+use spin_sdk::http::{FullBody, IntoResponse, Method, Request, Response, StatusCode};
+use spin_sdk::http_service;
+use spin_sdk::key_value::Store;
+use spin_sdk::llm::{InferencingModel::Llama2Chat, InferencingParams, infer_with_options};
 
 use serde::{Deserialize, Serialize};
 
@@ -41,37 +40,41 @@ User: {SENTENCE}
 "#;
 
 /// A Spin HTTP component that internally routes requests.
-#[http_component]
-fn handle_route(req: Request) -> Result<Response> {
-    let mut router = Router::new();
-    router.post("/api/sentiment-analysis", perform_sentiment_analysis);
-    router.any("/api/*", not_found);
-    router.handle(req)
+#[http_service]
+async fn handle_route(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() == Method::POST && req.uri().path() == "/api/sentiment-analysis" {
+        perform_sentiment_analysis(req).await
+    } else {
+        Ok(not_found())
+    }
 }
 
-fn not_found(_: Request, _: Params) -> Result<Response> {
-    Ok(http::Response::builder()
-        .status(404)
-        .body(Some("Not found".into()))?)
+fn not_found() -> Response<FullBody<Bytes>> {
+    Response::builder()
+        .status(StatusCode::NOT_FOUND)
+        .body(FullBody::new(Bytes::from("Not found")))
+        .unwrap()
 }
 
-fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<Response> {
-    let request = body_json_to_map(&req)?;
+async fn perform_sentiment_analysis(req: Request) -> anyhow::Result<Response<FullBody<Bytes>>> {
+    let request = body_json_to_map(req).await?;
     // Do some basic clean up on the input
     let sentence = request.sentence.trim();
     println!("Performing sentiment analysis on: {}", sentence);
 
     // Prepare the KV store
-    let kv = Store::open_default()?;
+    let kv = Store::open_default()
+        .await
+        .map_err(|e| anyhow::anyhow!("failed to open key-value store: {e:?}"))?;
 
     // If the sentiment of the sentence is already in the KV store, return it
-    if let Ok(sentiment) = kv.get(sentence) {
+    if let Ok(Some(sentiment)) = kv.get(sentence).await {
         println!("Found sentence in KV store returning cached sentiment");
         let resp = SentimentAnalysisResponse {
             sentiment: String::from_utf8(sentiment)?,
         };
 
-        return send_ok_response(200, resp);
+        return send_ok_response(StatusCode::OK, resp);
     }
     println!("Sentence not found in KV store");
 
@@ -80,11 +83,12 @@ fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<Response>
     let inferencing_result = infer_with_options(
         Llama2Chat,
         &PROMPT.replace("{SENTENCE}", sentence),
-        spin_sdk::llm::InferencingParams {
+        InferencingParams {
             max_tokens: 6,
             ..Default::default()
         },
-    )?;
+    )
+    .map_err(|e| anyhow::anyhow!("inference failed: {e:?}"))?;
     println!("Inference result {:?}", inferencing_result);
     let sentiment = inferencing_result
         .text
@@ -98,9 +102,9 @@ fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<Response>
 
     if let Ok(sentiment) = sentiment {
         println!("Caching sentiment in KV store");
-        let _ = kv.set(sentence, sentiment);
+        // Cache the result in the KV store
+        let _ = kv.set(sentence, sentiment).await;
     }
-    // Cache the result in the KV store
     let resp = SentimentAnalysisResponse {
         sentiment: sentiment
             .as_ref()
@@ -108,20 +112,29 @@ fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<Response>
             .unwrap_or_default(),
     };
 
-    send_ok_response(200, resp)
+    send_ok_response(StatusCode::OK, resp)
 }
 
-fn send_ok_response(code: u16, resp: SentimentAnalysisResponse) -> Result<Response> {
-    Ok(http::Response::builder()
+fn send_ok_response(
+    code: StatusCode,
+    resp: SentimentAnalysisResponse,
+) -> anyhow::Result<Response<FullBody<Bytes>>> {
+    Ok(Response::builder()
         .status(code)
-        .body(Some(serde_json::to_string(&resp)?.into()))?)
+        .header("content-type", "application/json")
+        .body(FullBody::new(Bytes::from(serde_json::to_string(&resp)?)))?)
 }
 
-fn body_json_to_map(req: &Request) -> Result<SentimentAnalysisRequest> {
-    let body = match req.body().as_ref() {
-        Some(bytes) => bytes,
-        None => anyhow::bail!("Request body was unexpectedly empty"),
-    };
+async fn body_json_to_map(req: Request) -> anyhow::Result<SentimentAnalysisRequest> {
+    let body = req
+        .into_body()
+        .bytes()
+        .await
+        .map_err(|e| anyhow::anyhow!("failed to read request body: {e:?}"))?;
+
+    if body.is_empty() {
+        anyhow::bail!("Request body was unexpectedly empty");
+    }
 
     Ok(serde_json::from_slice(&body)?)
 }

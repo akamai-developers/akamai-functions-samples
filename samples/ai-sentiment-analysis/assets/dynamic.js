@@ -27,17 +27,13 @@ function newCard() {
   globalCardCount++;
   var newCard = document.createElement("div");
   newCard.id = "card-" + cardIndex;
+  newCard.className = "result-card";
   newCard.innerHTML = `
-    <div class="card bg-white/75 shadow-lg w-full">
-        <div class="m-4 flex flex-col gap-2">
-            <div>${sentence}</div>
-            <div class="flex flex-row justify-end">
-                <span class="loading loading-dots loading-sm"></span>
-            </div>
-        </div>
-    </div>
+    <span class="sentence">${sentence}</span>
+    <span class="dots"></span>
     `;
-  document.getElementById("responses").before(newCard);
+  var responses = document.getElementById("responses");
+  responses.prepend(newCard);
 
   console.log("Running inference on sentence: " + sentence);
   runningInference = true;
@@ -55,42 +51,38 @@ function newCard() {
     })
     .catch((error) => {
       console.log(error);
+      runningInference = false;
     });
 }
 
 function updateCard(cardIndex, sentence, sentiment) {
-  badge = "";
+  var badge = "";
   if (sentiment === "positive") {
-    badge = `<span class="badge badge-success">Positive</span>`;
+    badge = `<span class="result-badge positive">Positive</span>`;
   } else if (sentiment === "negative") {
-    badge = `<span class="badge badge-error">Negative</span>`;
+    badge = `<span class="result-badge negative">Negative</span>`;
   } else if (sentiment === "neutral") {
-    badge = `<span class="badge badge-ghost">Neutral</span>`;
+    badge = `<span class="result-badge neutral">Neutral</span>`;
   } else {
-    badge = `<span class="badge badge-ghost">Unsure</span>`;
+    badge = `<span class="result-badge unsure">Unsure</span>`;
   }
   var cardElement = document.getElementById("card-" + cardIndex);
   cardElement.innerHTML = `
-    <div class="card bg-base-100 shadow-xl w-full">
-        <div class="m-4 flex flex-col gap-2">
-            <div>${sentence}</div>
-            <div class="flex flex-row justify-end">
-                ${badge}
-            </div>
-        </div>
-    </div>
+    <span class="sentence">${sentence}</span>
+    ${badge}
     `;
   runningInference = false;
 }
 
+function clearContext() {
+  document.getElementById("responses").innerHTML = "";
+  document.getElementById("alert").innerHTML = "";
+  globalCardCount = 0;
+}
+
 function setAlert(msg) {
   var alertElement = document.getElementById("alert");
-  alertElement.innerHTML = `
-    <div class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span class="text-error-content">${msg}</span>
-    </div>
-    `;
+  alertElement.innerHTML = `<div class="alert">${msg}</div>`;
   setTimeout(function() {
     alertElement.innerHTML = "";
   }, 3000);
