@@ -23,6 +23,6 @@
         "@spinframework/spin-mysql": "^1.0.0",
         "@spinframework/spin-variables": "^1.0.0",
         "itty-router": "^5.0.18",
-        "uuid": "^11.0.5"
+        "uuid": "^14.0.0"
     }
 }
