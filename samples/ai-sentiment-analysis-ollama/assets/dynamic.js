@@ -1,97 +1,96 @@
-// Listen for the Enter key being pressed
-document.addEventListener("keydown", function (event) {
-  if (event.keyCode === 13) {
-    newCard();
+(function () {
+  var runningInference = false;
+
+  function el(id) {
+    return document.getElementById(id);
   }
-});
 
-var globalCardCount = 0;
-var runningInference = false;
-
-function newCard() {
-  if (runningInference) {
-    console.log("Already running inference, please wait...");
-    setAlert("Already running inference, please wait...");
-    return;
+  function setStatus(msg) {
+    el("status").textContent = msg || "";
   }
-  var inputElement = document.getElementById("sentence-input");
-  var sentence = inputElement.value;
-  if (sentence === "") {
-    console.log("Please enter a sentence to analyze");
-    setAlert("Please enter a sentence to analyze");
-    return;
+
+  function pill(sentiment) {
+    switch (sentiment) {
+      case "positive":
+        return '<span class="pill positive">Positive</span>';
+      case "negative":
+        return '<span class="pill negative">Negative</span>';
+      case "neutral":
+        return '<span class="pill neutral">Neutral</span>';
+      default:
+        return '<span class="pill error">Unsure</span>';
+    }
   }
-  inputElement.value = "";
 
-  var cardIndex = globalCardCount;
-  globalCardCount++;
-  var newCard = document.createElement("div");
-  newCard.id = "card-" + cardIndex;
-  newCard.innerHTML = `
-    <div class="card text-lg bg-white/75 shadow-lg w-full">
-        <div class="m-4 flex flex-col gap-2">
-            <div>${sentence}</div>
-            <div class="flex flex-row justify-end">
-                <span class="loading loading-dots loading-sm"></span>
-            </div>
-        </div>
-    </div>
-    `;
-  document.getElementById("responses").before(newCard);
+  function analyze() {
+    if (runningInference) {
+      setStatus("Already running inference, please wait…");
+      return;
+    }
 
-  console.log("Running inference on sentence: " + sentence);
-  runningInference = true;
-  fetch("/api/sentiment-analysis", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ sentence: sentence }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      updateCard(cardIndex, sentence, data.sentiment);
+    var input = el("sentence-input");
+    var sentence = input.value.trim();
+    if (sentence === "") {
+      setStatus("Please enter some text to analyze.");
+      return;
+    }
+
+    setStatus("");
+    input.value = "";
+
+    // Insert a card with a loading indicator at the top of the results.
+    var card = document.createElement("div");
+    card.className = "result";
+    card.innerHTML =
+      '<span class="sentence"></span><span class="pill loading">Analyzing…</span>';
+    card.querySelector(".sentence").textContent = sentence;
+    var results = el("results");
+    results.insertBefore(card, results.firstChild);
+
+    runningInference = true;
+    el("analyze-btn").disabled = true;
+
+    fetch("/api/sentiment-analysis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sentence: sentence }),
     })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-
-function updateCard(cardIndex, sentence, sentiment) {
-  badge = "";
-  if (sentiment === "positive") {
-    badge = `<span class="badge badge-success text-xl">Positive</span>`;
-  } else if (sentiment === "negative") {
-    badge = `<span class="badge badge-error text-white text-xl">Negative</span>`;
-  } else if (sentiment === "neutral") {
-    badge = `<span class="badge badge-ghost text-xl p-3">Neutral</span>`;
-  } else {
-    badge = `<span class="badge badge-ghost text-xl p-3">Unsure</span>`;
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Request failed with status " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        card.querySelector(".pill").outerHTML = pill(data.sentiment);
+      })
+      .catch(function (error) {
+        console.error(error);
+        card.querySelector(".pill").outerHTML =
+          '<span class="pill error">Failed</span>';
+        setStatus("Something went wrong. Check that the Ollama server is reachable.");
+      })
+      .finally(function () {
+        runningInference = false;
+        el("analyze-btn").disabled = false;
+      });
   }
-  var cardElement = document.getElementById("card-" + cardIndex);
-  cardElement.innerHTML = `
-    <div class="card text-lg bg-base-100 shadow-xl w-full">
-        <div class="m-4 flex flex-col gap-2">
-            <div>${sentence}</div>
-            <div class="flex flex-row justify-end">
-                ${badge}
-            </div>
-        </div>
-    </div>
-    `;
-  runningInference = false;
-}
 
-function setAlert(msg) {
-  var alertElement = document.getElementById("alert");
-  alertElement.innerHTML = `
-    <div class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span class="text-error-content">${msg}</span>
-    </div>
-    `;
-  setTimeout(function () {
-    alertElement.innerHTML = "";
-  }, 3000);
-}
+  function clearResults() {
+    el("results").innerHTML = "";
+    el("sentence-input").value = "";
+    setStatus("");
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    el("analyze-btn").addEventListener("click", analyze);
+    el("clear-btn").addEventListener("click", clearResults);
+
+    // Submit on Ctrl/Cmd + Enter from the textarea.
+    el("sentence-input").addEventListener("keydown", function (event) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        analyze();
+      }
+    });
+  });
+})();

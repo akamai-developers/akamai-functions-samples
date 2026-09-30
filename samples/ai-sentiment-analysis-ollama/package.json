@@ -4,28 +4,29 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node build.mjs && mkdirp dist && j2w -i build/bundle.js --initLocation http://api.localhost -o dist/api.wasm",
-    "build:debug": "node build.mjs && mkdirp dist && j2w -d -i build/bundle.js --initLocation http://api.localhost -o dist/api.wasm",
+    "build": "tsc --noEmit && node build.mjs",
+    "build:debug": "tsc --noEmit && node build.mjs --debug",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "esbuild": "^0.28.1",
-    "mkdirp": "^3.0.1",
-    "ts-loader": "^9.6.1",
-    "typescript": "^4.8.4"
+   "mkdirp": "^3.0.1",
+    "ts-loader": "^9.4.1",
+    "typescript": "^7.0.2",
+    "esbuild": "^0.28.2",
+    "@bytecodealliance/jco": "^1.17.6"
   },
   "dependencies": {
-    "@langchain/core": "1.2.0",
+    "@langchain/core": "1.2.13",
     "@langchain/ollama": "1.3.0",
-    "@langchain/openai": "1.5.1",
-    "@spinframework/build-tools": "^1.0.7",
+    "@langchain/openai": "1.6.0",
+    "@spinframework/build-tools": "2.1.1",
     "@spinframework/spin-kv": "^1.0.1",
     "@spinframework/spin-variables": "^1.0.1",
-    "@spinframework/wasi-http-proxy": "^1.0.1",
+    "@spinframework/wasi-http-proxy": "2.0.0",
     "abortcontroller-polyfill": "^1.7.8",
-    "hono": "^4.10.3"
+    "hono": "^4.13.12"
   }
 }

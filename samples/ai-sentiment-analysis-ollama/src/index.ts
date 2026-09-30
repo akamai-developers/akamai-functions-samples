@@ -101,5 +101,8 @@ app.post('/api/sentiment-analysis', async (c: Context) => {
   return c.json({ error: 'Unable to determine sentiment' })
 })
 
-app.fire()
+//@ts-ignore
+addEventListener('fetch', (event: FetchEvent) => {
+  event.respondWith(app.fetch(event.request))
+})
 

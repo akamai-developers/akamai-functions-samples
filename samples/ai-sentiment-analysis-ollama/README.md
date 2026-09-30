@@ -8,6 +8,8 @@ The Spin App consists of three different components:
 - A HTTP API implemented using TypeScript and LangChain.js
 - The Key-Value Explorer to examine persisted sentiment analysis
 
+The TypeScript API component is built with the modern Spin JS/TS toolchain (`esbuild` + `jco` via `@spinframework/build-tools`, driven by `build.mjs`).
+
 ## Configuration Variables
 
 See all available configuration variables in the following table:
@@ -35,6 +37,27 @@ export SPIN_VARIABLE_kv_explorer_password=secret
 
 spin up
 ```
+
+## Using the app
+
+Once the app is running, open [http://localhost:3000](http://localhost:3000) in a
+browser, type some text into the box, and click **Analyze sentiment**. The
+frontend calls the API component and shows whether the tone is positive,
+negative, or neutral.
+
+You can also call the API directly. It exposes `POST /api/sentiment-analysis`
+and expects a JSON body with a single `sentence` property:
+
+```bash
+curl -X POST http://localhost:3000/api/sentiment-analysis \
+  -H "Content-Type: application/json" \
+  -d '{"sentence": "I am so happy today"}'
+# => {"sentiment":"positive"}
+```
+
+Results are cached in the key-value store, so repeating a phrase returns the
+cached sentiment without another inference call. You can inspect the cache via
+the Key-Value Explorer at `/internal/kv-explorer/`.
 
 ## Deploying to Fermyon Wasm Functions
 

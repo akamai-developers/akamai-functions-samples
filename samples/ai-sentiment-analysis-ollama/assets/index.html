@@ -1,82 +1,258 @@
 <!DOCTYPE html>
-<html data-theme="cupcake">
+<html lang="en">
 
 <head>
-  <title>AI-Powered Sentiment Analyzer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Perform sentiment analysis" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Perform sentiment analysis at the edge with Akamai Functions." />
   <link rel="icon" type="image/png" href="./favicon.png" />
+  <title>AI Sentiment Analysis &middot; Akamai Functions</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141a2e;
+      --border: #26304d;
+      --text: #e7ebf5;
+      --muted: #9aa5c0;
+      --accent: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --positive: #22c55e;
+      --negative: #ef4444;
+      --neutral: #64748b;
+    }
 
-  <!-- Tailwind and Daisy UI -->
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.2.1/dist/full.css" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    * { box-sizing: border-box; }
 
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 120px 1.5rem 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 1.0625rem;
+      background: radial-gradient(1200px 600px at 50% -10%, #241a4d 0%, var(--bg) 60%), var(--bg);
+      color: var(--text);
+    }
 
-  <!-- Import script to make page dynamic -->
-  <script src="dynamic.js"></script>
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1.9rem;
+      line-height: 1.2;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0.75rem 0;
+    }
+
+    .controls {
+      margin-top: 1.5rem;
+      text-align: left;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 0.9rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea::placeholder { color: rgba(154, 165, 192, 0.7); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 0.85rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.4rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 10px;
+      transition: background 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn svg { width: 1.1em; height: 1.1em; }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn.secondary:hover { background: rgba(255, 255, 255, 0.06); }
+
+    .results {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+    }
+
+    .result {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1.1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .result .sentence {
+      color: var(--text);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .pill {
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .pill.loading { color: var(--muted); background: rgba(255, 255, 255, 0.06); }
+    .pill.positive { color: #052e16; background: var(--positive); }
+    .pill.negative { color: #450a0a; background: var(--negative); }
+    .pill.neutral  { color: #f8fafc; background: var(--neutral); }
+    .pill.error    { color: #fff; background: var(--negative); }
+
+    .status {
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+      color: var(--accent);
+      min-height: 1.2em;
+    }
+
+    footer {
+      margin-top: 1.75rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    footer a:hover { color: var(--text); }
+    footer a svg { width: 1em; height: 1em; }
+  </style>
 </head>
 
-<body class="bg-[#F4F5F4]">
-  <div id="alert" class="fixed top-20 inset-x-0 w-1/2 mx-auto"></div>
+<body>
+  <main class="card">
+    <span class="badge">Akamai Functions Samples</span>
+    <h1>AI Sentiment Analysis</h1>
+    <p>
+      Enter some text and a Spin Function will run it through a Llama model on
+      Ollama to infer whether the tone is <strong>positive</strong>,
+      <strong>negative</strong>, or <strong>neutral</strong>. Results are cached
+      in the key-value store, so repeated phrases return instantly.
+    </p>
 
-  <div class="flex flex-col min-h-screen">
-    <div
-      class="sticky top-0 z-30 flex h-16 w-full justify-center bg-white backdrop-blur transition-all duration-100 bg-base-100 text-base-content shadow-md">
-      <nav class="navbar w-full items-center justify-between">
-        <div class="">
-          <img src="./akamai-fermyon.svg" alt="This app runs on Akamai Cloud with Fermyon Wasm Functions"
-            class="h-14 pl-4" />
-        </div>
-        <div class="mx-auto justify-center place-content-center -left-20 relative">
-          <a href="/" class="text-3xl font-500 text-black px-4">
-            <span class=" text-[#007AC6]">AI-Powered</span>&nbsp;
-            Sentiment Analyzer
-          </a>
-        </div>
-        <div class="">
-          <a href="" class="btn bg-white text-[#007AC6] rounded-md case normal-case text-xl">Clear Context</a>
-        </div>
-      </nav>
-    </div>
-    <main class="mx-auto max-w-5xl my-10 prose overflow-y-scroll min-h-screen mb-56">
-      <p class="text-slate-800 text-lg">
-        This tool uses AI inference to interpret the sentiment of virtually any text based on the inferred tone or
-        emotional feeling. To perform your sentiment analysis, simply enter some text into the box below and click the
-        "Analyze" button.
-      </p>
-      <p class="text-slate-800 mb-6 text-lg">
-        To perform your sentiment analysis, simply enter some text into the box below and click the "<kbd
-          class="kbd kbd-sm">Analyze</kbd>" button.
-      </p>
-
-      <div id="responses">
-        <!-- chat messages are posted here -->
+    <div class="controls">
+      <textarea id="sentence-input" placeholder="Type the text you want to analyze here…"></textarea>
+      <div class="actions">
+        <button class="btn secondary" type="button" id="clear-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+          </svg>
+          Clear
+        </button>
+        <button class="btn" type="button" id="analyze-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+          Analyze sentiment
+        </button>
       </div>
+    </div>
 
-      <footer class="fixed max-w-5xl pb-4 bottom-0 prose mx-auto bg-[#F4F5F4] border-t border-blue-200/75">
-        <div class="input-wrapper columns-2 grid grid-12 rounded-lg w-full pt-3">
-          <div class="flex">
-            <input id="sentence-input" type="text" placeholder="Type the sentence you want to analyze here"
-              class="input rounded-md bg-white w-full text-lg mr-2 col-span-10 text-slate-800" />
-            <div class="flex">
-              <button
-                class="btn bg-[#007AC6] hover:bg-[#158BD4] text-white rounded-md case normal-case w-fit col-span-2 text-xl"
-                onclick="newCard()">Analyze</button>
-            </div>
-          </div>
-        </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
 
-        <p class="text-md text-zinc-500 text-justify m-0 mt-6 mb-2 font-mono">
-          Cloud IaaS and serverless functions built on our ISV partner Fermyon. Prompts are sent to a Spin app running
-          in Fermyon Wasm Functions, inferencing is performed using the LangChain and a Llama 3.2 model running on
-          Linode with a dedicated GPU , and the response
-          is cached in the globally distributed Key-Value store provided by Fermyon Wasm Functions.
-        </p>
-      </footer>
+    <div class="results" id="results"></div>
 
-    </main>
-  </div>
+    <footer>
+      <a href="https://github.com/akamai-developers/akamai-functions-samples"
+         target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.05.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/>
+        </svg>
+        Akamai Functions Samples
+      </a>
+    </footer>
+  </main>
 
+  <script src="dynamic.js"></script>
 </body>
 
 </html>
