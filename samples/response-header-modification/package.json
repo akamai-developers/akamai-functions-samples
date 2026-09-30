@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "npx webpack && mkdirp dist && j2w -i build/bundle.js -o dist/response-header-modification.wasm",
+        "build": "node build.mjs",
+        "build:debug": "node build.mjs --debug",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -12,13 +13,12 @@
     "license": "ISC",
     "devDependencies": {
         "mkdirp": "^3.0.1",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
+        "esbuild": "^0.28.2",
+        "@bytecodealliance/jco": "^1.17.6"
     },
     "dependencies": {
-        "@spinframework/build-tools": "^1.0.1",
-        "@spinframework/wasi-http-proxy": "^1.0.0",
-        "@spinframework/spin-variables": "^1.0.0",
-        "itty-router": "^5.0.18"
+        "@spinframework/spin-variables": "^1.0.1",
+        "itty-router": "^5.0.24",
+        "@spinframework/wasi-http-proxy": "^2.0.0"
     }
 }
