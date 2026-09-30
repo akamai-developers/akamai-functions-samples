@@ -7,7 +7,13 @@ name = "hello-postgresql"
 version = "0.1.0"
 
 [variables]
-pg_connection_string = { required = true }
+pg_host = { default = "localhost" }
+pg_schema = { default = "postgres" }
+pg_port = { default = "5432" }
+pg_user = { required = true }
+pg_password = { default ="", secret=true }
+pg_db = {required = true }
+
 
 [[trigger.http]]
 route = "/..."
@@ -17,11 +23,11 @@ component = "hello-postgresql"
 source = "dist/hello-postgresql.wasm"
 exclude_files = ["**/node_modules"]
 allowed_outbound_hosts = [
-  "postgres://ep-red-mouse-a2flzxns.eu-central-1.aws.neon.tech:5432",
+  "{{ pg_schema }}://{{ pg_host }}:{{ pg_port }}"
 ]
 
 [component.hello-postgresql.variables]
-pg_connection_string = "{{ pg_connection_string }}"
+pg_connection_string = "{{ pg_schema }}://{{ pg_user }}:{{ pg_password }}@{{ pg_host }}:{{ pg_port }}/{{ pg_db }}"
 
 [component.hello-postgresql.build]
 command = ["npm install", "npm run build"]
