@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@spinframework/spin-variables": "^1.0.0",
-        "hono": "4.12.9`",
+        "hono": "4.13.5`",
         "@spinframework/wasi-http-proxy": "^2.0.0"
     },
     "allowScripts": {
